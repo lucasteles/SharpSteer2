@@ -28,7 +28,7 @@
     <InternalsVisibleTo Include="SharpSteer2.Tests"/>
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)\..\readme.md" Pack="true" PackagePath="\"/>
+    <None Include="$(MSBuildThisFileDirectory)\..\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
