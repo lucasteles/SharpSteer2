@@ -18,3 +18,4 @@ SharpSteer2.Tests/bin
 SharpSteer2.Tests/obj
 _Resharper.*
 .vscode/
+.idea/
