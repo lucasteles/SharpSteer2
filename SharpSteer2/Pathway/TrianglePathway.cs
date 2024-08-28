@@ -3,30 +3,25 @@
 namespace SharpSteer2.Pathway;
 
 /// <summary>
-/// A pathway made out of triangular segments
+///     A pathway made out of triangular segments
 /// </summary>
 public class TrianglePathway
     : IPathway
 {
     readonly Triangle[] path;
 
-    public IEnumerable<Triangle> Triangles => path;
-
-    readonly PolylinePathway centerline;
-    public PolylinePathway Centerline => centerline;
-
     public TrianglePathway(IEnumerable<Triangle> path, bool cyclic = false)
     {
         this.path = path.ToArray();
 
         //Calculate center points
-        for (int i = 0; i < this.path.Length; i++)
-            this.path[i].PointOnPath = (2 * this.path[i].A + this.path[i].Edge0) / 2;
+        for (var i = 0; i < this.path.Length; i++)
+            this.path[i].PointOnPath = ((2 * this.path[i].A) + this.path[i].Edge0) / 2;
 
         //Calculate tangents along path
-        for (int i = 0; i < this.path.Length; i++)
+        for (var i = 0; i < this.path.Length; i++)
         {
-            var bIndex = cyclic ? ((i + 1) % this.path.Length) : Math.Min(i + 1, this.path.Length - 1);
+            var bIndex = cyclic ? (i + 1) % this.path.Length : Math.Min(i + 1, this.path.Length - 1);
 
             var vectorToNextTriangle = this.path[bIndex].PointOnPath - this.path[i].PointOnPath;
             var l = vectorToNextTriangle.Length();
@@ -37,8 +32,11 @@ public class TrianglePathway
                 this.path[i].Tangent = Vector3.Zero;
         }
 
-        centerline = new(this.path.Select(a => a.PointOnPath).ToArray(), 0.1f, cyclic);
+        Centerline = new(this.path.Select(a => a.PointOnPath).ToArray(), 0.1f, cyclic);
     }
+
+    public IEnumerable<Triangle> Triangles => path;
+    public PolylinePathway Centerline { get; }
 
     public Vector3 MapPointToPath(Vector3 point, out Vector3 tangent, out float outside)
     {
@@ -46,42 +44,7 @@ public class TrianglePathway
         return MapPointToPath(point, out tangent, out outside, out index);
     }
 
-    Vector3 MapPointToPath(Vector3 point, out Vector3 tangent, out float outside, out int segmentIndex)
-    {
-        float distanceSqr = float.PositiveInfinity;
-        Vector3 closestPoint = Vector3.Zero;
-        bool inside = false;
-        segmentIndex = -1;
-
-        for (int i = 0; i < path.Length; i++)
-        {
-            bool isInside;
-            var p = ClosestPointOnTriangle(ref path[i], point, out isInside);
-
-            var normal = (point - p);
-            var dSqr = normal.LengthSquared();
-
-            if (dSqr < distanceSqr)
-            {
-                distanceSqr = dSqr;
-                closestPoint = p;
-                inside = isInside;
-                segmentIndex = i;
-            }
-
-            if (isInside)
-                break;
-        }
-
-        if (segmentIndex == -1)
-            throw new InvalidOperationException("Closest Path Segment Not Found (Zero Length Path?");
-
-        tangent = path[segmentIndex].Tangent;
-        outside = (float)Math.Sqrt(distanceSqr) * (inside ? -1 : 1);
-        return closestPoint;
-    }
-
-    public Vector3 MapPathDistanceToPoint(float pathDistance) => centerline.MapPathDistanceToPoint(pathDistance);
+    public Vector3 MapPathDistanceToPoint(float pathDistance) => Centerline.MapPathDistanceToPoint(pathDistance);
 
     //// clip or wrap given path distance according to cyclic flag
     //if (_cyclic)
@@ -110,36 +73,41 @@ public class TrianglePathway
     //    }
     //}
     //return Vector3.Zero;
-    public float MapPointToPathDistance(Vector3 point) => centerline.MapPointToPathDistance(point);
+    public float MapPointToPathDistance(Vector3 point) => Centerline.MapPointToPathDistance(point);
 
-    public struct Triangle
+    Vector3 MapPointToPath(Vector3 point, out Vector3 tangent, out float outside, out int segmentIndex)
     {
-        public readonly Vector3 A;
-        public readonly Vector3 Edge0;
-        public readonly Vector3 Edge1;
+        var distanceSqr = float.PositiveInfinity;
+        var closestPoint = Vector3.Zero;
+        var inside = false;
+        segmentIndex = -1;
 
-        internal Vector3 Tangent;
-        internal Vector3 PointOnPath;
-
-        internal readonly float Determinant;
-
-        public Triangle(Vector3 a, Vector3 b, Vector3 c)
+        for (var i = 0; i < path.Length; i++)
         {
-            A = a;
-            Edge0 = b - a;
-            Edge1 = c - a;
+            bool isInside;
+            var p = ClosestPointOnTriangle(ref path[i], point, out isInside);
 
-            PointOnPath = Vector3.Zero;
-            Tangent = Vector3.Zero;
+            var normal = point - p;
+            var dSqr = normal.LengthSquared();
 
-            // ReSharper disable once ImpureMethodCallOnReadonlyValueField
-            var edge0LengthSquared = Edge0.LengthSquared();
+            if (dSqr < distanceSqr)
+            {
+                distanceSqr = dSqr;
+                closestPoint = p;
+                inside = isInside;
+                segmentIndex = i;
+            }
 
-            var edge0DotEdge1 = Vector3.Dot(Edge0, Edge1);
-            var edge1LengthSquared = Vector3.Dot(Edge1, Edge1);
-
-            Determinant = edge0LengthSquared * edge1LengthSquared - edge0DotEdge1 * edge0DotEdge1;
+            if (isInside)
+                break;
         }
+
+        if (segmentIndex == -1)
+            throw new InvalidOperationException("Closest Path Segment Not Found (Zero Length Path?");
+
+        tangent = path[segmentIndex].Tangent;
+        outside = (float)Math.Sqrt(distanceSqr) * (inside ? -1 : 1);
+        return closestPoint;
     }
 
     static Vector3 ClosestPointOnTriangle(ref Triangle triangle, Vector3 sourcePosition, out bool inside)
@@ -148,21 +116,22 @@ public class TrianglePathway
         return ClosestPointOnTriangle(ref triangle, sourcePosition, out a, out b, out inside);
     }
 
-    internal static Vector3 ClosestPointOnTriangle(ref Triangle triangle, Vector3 sourcePosition, out float edge0Distance, out float edge1Distance, out bool inside)
+    internal static Vector3 ClosestPointOnTriangle(ref Triangle triangle, Vector3 sourcePosition,
+        out float edge0Distance, out float edge1Distance, out bool inside)
     {
-        Vector3 v0 = triangle.A - sourcePosition;
+        var v0 = triangle.A - sourcePosition;
 
         // ReSharper disable once ImpureMethodCallOnReadonlyValueField
-        float a = triangle.Edge0.LengthSquared();
-        float b = Vector3.Dot(triangle.Edge0, triangle.Edge1);
+        var a = triangle.Edge0.LengthSquared();
+        var b = Vector3.Dot(triangle.Edge0, triangle.Edge1);
         // ReSharper disable once ImpureMethodCallOnReadonlyValueField
-        float c = triangle.Edge1.LengthSquared();
-        float d = Vector3.Dot(triangle.Edge0, v0);
-        float e = Vector3.Dot(triangle.Edge1, v0);
+        var c = triangle.Edge1.LengthSquared();
+        var d = Vector3.Dot(triangle.Edge0, v0);
+        var e = Vector3.Dot(triangle.Edge1, v0);
 
-        float det = triangle.Determinant;
-        float s = b * e - c * d;
-        float t = b * d - a * e;
+        var det = triangle.Determinant;
+        var s = (b * e) - (c * d);
+        var t = (b * d) - (a * e);
 
         inside = false;
         if (s + t < det)
@@ -195,7 +164,7 @@ public class TrianglePathway
             }
             else
             {
-                float invDet = 1 / det;
+                var invDet = 1 / det;
                 s *= invDet;
                 t *= invDet;
                 inside = true;
@@ -205,12 +174,12 @@ public class TrianglePathway
         {
             if (s < 0)
             {
-                float tmp0 = b + d;
-                float tmp1 = c + e;
+                var tmp0 = b + d;
+                var tmp1 = c + e;
                 if (tmp1 > tmp0)
                 {
-                    float numer = tmp1 - tmp0;
-                    float denom = a - 2 * b + c;
+                    var numer = tmp1 - tmp0;
+                    var denom = a - (2 * b) + c;
                     s = Utilities.Clamp(numer / denom, 0, 1);
                     t = 1 - s;
                 }
@@ -224,8 +193,8 @@ public class TrianglePathway
             {
                 if (a + d > b + e)
                 {
-                    float numer = c + e - b - d;
-                    float denom = a - 2 * b + c;
+                    var numer = c + e - b - d;
+                    var denom = a - (2 * b) + c;
                     s = Utilities.Clamp(numer / denom, 0, 1);
                     t = 1 - s;
                 }
@@ -237,8 +206,8 @@ public class TrianglePathway
             }
             else
             {
-                float numer = c + e - b - d;
-                float denom = a - 2 * b + c;
+                var numer = c + e - b - d;
+                var denom = a - (2 * b) + c;
                 s = Utilities.Clamp(numer / denom, 0, 1);
                 t = 1 - s;
             }
@@ -246,6 +215,36 @@ public class TrianglePathway
 
         edge0Distance = s;
         edge1Distance = t;
-        return triangle.A + s * triangle.Edge0 + t * triangle.Edge1;
+        return triangle.A + (s * triangle.Edge0) + (t * triangle.Edge1);
+    }
+
+    public struct Triangle
+    {
+        public readonly Vector3 A;
+        public readonly Vector3 Edge0;
+        public readonly Vector3 Edge1;
+
+        internal Vector3 Tangent;
+        internal Vector3 PointOnPath;
+
+        internal readonly float Determinant;
+
+        public Triangle(Vector3 a, Vector3 b, Vector3 c)
+        {
+            A = a;
+            Edge0 = b - a;
+            Edge1 = c - a;
+
+            PointOnPath = Vector3.Zero;
+            Tangent = Vector3.Zero;
+
+            // ReSharper disable once ImpureMethodCallOnReadonlyValueField
+            var edge0LengthSquared = Edge0.LengthSquared();
+
+            var edge0DotEdge1 = Vector3.Dot(Edge0, Edge1);
+            var edge1LengthSquared = Vector3.Dot(Edge1, Edge1);
+
+            Determinant = (edge0LengthSquared * edge1LengthSquared) - (edge0DotEdge1 * edge0DotEdge1);
+        }
     }
 }

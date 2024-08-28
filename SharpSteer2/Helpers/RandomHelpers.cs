@@ -5,13 +5,13 @@ public static class RandomHelpers
     static Random Rng => System.Random.Shared;
 
     /// <summary>
-    /// Returns a float randomly distributed between 0 and 1
+    ///     Returns a float randomly distributed between 0 and 1
     /// </summary>
     /// <returns></returns>
     public static float Random() => (float)Rng.NextDouble();
 
     /// <summary>
-    /// Returns a float randomly distributed between lowerBound and upperBound
+    ///     Returns a float randomly distributed between lowerBound and upperBound
     /// </summary>
     /// <param name="lowerBound"></param>
     /// <param name="upperBound"></param>

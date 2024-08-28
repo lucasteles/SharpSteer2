@@ -13,44 +13,44 @@ namespace SharpSteer2;
 public interface IVehicle : ILocalSpaceBasis
 {
     /// <summary>
-    /// mass (defaults to unity so acceleration=force)
+    ///     mass (defaults to unity so acceleration=force)
     /// </summary>
     float Mass { get; }
 
     /// <summary>
-    /// size of bounding sphere, for obstacle avoidance, etc.
+    ///     size of bounding sphere, for obstacle avoidance, etc.
     /// </summary>
     float Radius { get; }
 
     /// <summary>
-    /// velocity of vehicle
+    ///     velocity of vehicle
     /// </summary>
     Vector3 Velocity { get; }
 
     /// <summary>
-    /// Gets the acceleration of the vehicle.
+    ///     Gets the acceleration of the vehicle.
     /// </summary>
     Vector3 Acceleration { get; }
 
     /// <summary>
-    /// speed of vehicle (perhaps faster than taking magnitude of velocity)
+    ///     speed of vehicle (perhaps faster than taking magnitude of velocity)
     /// </summary>
     float Speed { get; }
 
     /// <summary>
-    /// predict position of this vehicle at some time in the future (assumes velocity remains constant)
-    /// </summary>
-    /// <param name="predictionTime"></param>
-    /// <returns></returns>
-    Vector3 PredictFuturePosition(float predictionTime);
-
-    /// <summary>
-    /// the maximum steering force this vehicle can apply
+    ///     the maximum steering force this vehicle can apply
     /// </summary>
     float MaxForce { get; }
 
     /// <summary>
-    /// the maximum speed this vehicle is allowed to move
+    ///     the maximum speed this vehicle is allowed to move
     /// </summary>
     float MaxSpeed { get; }
+
+    /// <summary>
+    ///     predict position of this vehicle at some time in the future (assumes velocity remains constant)
+    /// </summary>
+    /// <param name="predictionTime"></param>
+    /// <returns></returns>
+    Vector3 PredictFuturePosition(float predictionTime);
 }

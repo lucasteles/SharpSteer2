@@ -13,13 +13,13 @@ namespace SharpSteer2.Database;
 public interface ITokenForProximityDatabase<TContentType> : IDisposable
 {
     /// <summary>
-    /// the client object calls this each time its position changes
+    ///     the client object calls this each time its position changes
     /// </summary>
     /// <param name="position"></param>
     void UpdateForNewPosition(Vector3 position);
 
     /// <summary>
-    /// find all neighbors within the given sphere (as center and radius)
+    ///     find all neighbors within the given sphere (as center and radius)
     /// </summary>
     /// <param name="center"></param>
     /// <param name="radius"></param>

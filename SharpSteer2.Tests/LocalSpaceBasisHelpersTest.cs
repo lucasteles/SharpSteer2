@@ -14,8 +14,8 @@ public class LocalSpaceBasisHelpersTest
     [TestMethod]
     public void GlobalizeDirectionTest()
     {
-        Matrix4x4 m = Matrix4x4.CreateRotationX(-PiOver2);
-        ILocalSpaceBasis basis = Basis(m);
+        var m = Matrix4x4.CreateRotationX(-PiOver2);
+        var basis = Basis(m);
 
         var v = Vector3.Normalize(new(1, 2, 3));
         Assert.AreEqual(Vector3.TransformNormal(v, m), basis.GlobalizeDirection(v));
@@ -24,8 +24,8 @@ public class LocalSpaceBasisHelpersTest
     [TestMethod]
     public void GlobalizePositionTest()
     {
-        Matrix4x4 m = Matrix4x4.CreateRotationX(-PiOver2) * Matrix4x4.CreateTranslation(10, 20, 30);
-        ILocalSpaceBasis basis = Basis(m);
+        var m = Matrix4x4.CreateRotationX(-PiOver2) * Matrix4x4.CreateTranslation(10, 20, 30);
+        var basis = Basis(m);
 
         var v = Vector3.Normalize(new(1, 2, 3));
         Assert.AreEqual(Vector3.Transform(v, m), basis.GlobalizePosition(v));
@@ -34,8 +34,8 @@ public class LocalSpaceBasisHelpersTest
     [TestMethod]
     public void LocalizeDirectionTest()
     {
-        Matrix4x4 m = Matrix4x4.CreateRotationX(-PiOver2);
-        ILocalSpaceBasis basis = Basis(m);
+        var m = Matrix4x4.CreateRotationX(-PiOver2);
+        var basis = Basis(m);
 
         var v = Vector3.Normalize(new(1, 2, 3));
         Matrix4x4 inv;
@@ -46,8 +46,8 @@ public class LocalSpaceBasisHelpersTest
     [TestMethod]
     public void LocalizePositionTest()
     {
-        Matrix4x4 m = Matrix4x4.CreateRotationX(-PiOver2) * Matrix4x4.CreateTranslation(10, 20, 30);
-        ILocalSpaceBasis basis = Basis(m);
+        var m = Matrix4x4.CreateRotationX(-PiOver2) * Matrix4x4.CreateTranslation(10, 20, 30);
+        var basis = Basis(m);
 
         var v = Vector3.Normalize(new(1, 2, 3));
         Matrix4x4 inv;

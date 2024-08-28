@@ -14,30 +14,13 @@ namespace SharpSteer2;
 
 public class SimpleVehicle(IAnnotationService annotations = null) : SteerLibrary(annotations)
 {
+    // The acceleration is smoothed
+    Vector3 acceleration;
     Vector3 lastForward;
     Vector3 lastPosition;
     float smoothedCurvature;
-    // The acceleration is smoothed
-    Vector3 acceleration;
 
-    // reset vehicle state
-    public override void Reset()
-    {
-        base.Reset();
-
-        // reset LocalSpace state
-        ResetLocalSpace();
-
-        Mass = 1;          // Mass (defaults to 1 so acceleration=force)
-        Speed = 0;         // speed along Forward direction.
-
-        Radius = 0.5f;     // size of bounding sphere
-
-        // reset bookkeeping to do running averages of these quanities
-        ResetSmoothedPosition();
-        ResetSmoothedCurvature();
-        ResetAcceleration();
-    }
+    Vector3 smoothedPosition;
 
     // get/set Mass
     // Mass (defaults to unity so acceleration=force)
@@ -64,24 +47,52 @@ public class SimpleVehicle(IAnnotationService annotations = null) : SteerLibrary
     // (velocity is clipped to this magnitude)
     public override float MaxSpeed => 1;
 
+    // get instantaneous curvature (since last update)
+    protected float Curvature { get; private set; }
+
+    // get/reset smoothedCurvature, smoothedAcceleration and smoothedPosition
+    public float SmoothedCurvature => smoothedCurvature;
+
+    public override Vector3 Acceleration => acceleration;
+    public Vector3 SmoothedPosition => smoothedPosition;
+
+    // reset vehicle state
+    public override void Reset()
+    {
+        base.Reset();
+
+        // reset LocalSpace state
+        ResetLocalSpace();
+
+        Mass = 1; // Mass (defaults to 1 so acceleration=force)
+        Speed = 0; // speed along Forward direction.
+
+        Radius = 0.5f; // size of bounding sphere
+
+        // reset bookkeeping to do running averages of these quanities
+        ResetSmoothedPosition();
+        ResetSmoothedCurvature();
+        ResetAcceleration();
+    }
+
     // apply a given steering force to our momentum,
     // adjusting our orientation to maintain velocity-alignment.
     public void ApplySteeringForce(Vector3 force, float elapsedTime)
     {
-        Vector3 adjustedForce = AdjustRawSteeringForce(force, elapsedTime);
+        var adjustedForce = AdjustRawSteeringForce(force, elapsedTime);
 
         // enforce limit on magnitude of steering force
-        Vector3 clippedForce = adjustedForce.TruncateLength(MaxForce);
+        var clippedForce = adjustedForce.TruncateLength(MaxForce);
 
         // compute acceleration and velocity
-        Vector3 newAcceleration = (clippedForce / Mass);
-        Vector3 newVelocity = Velocity;
+        var newAcceleration = clippedForce / Mass;
+        var newVelocity = Velocity;
 
         // damp out abrupt changes and oscillations in steering acceleration
         // (rate is proportional to time step, then clipped into useful range)
         if (elapsedTime > 0)
         {
-            float smoothRate = Utilities.Clamp(9 * elapsedTime, 0.15f, 0.4f);
+            var smoothRate = Utilities.Clamp(9 * elapsedTime, 0.15f, 0.4f);
             Utilities.BlendIntoAccumulator(smoothRate, newAcceleration, ref acceleration);
         }
 
@@ -92,10 +103,10 @@ public class SimpleVehicle(IAnnotationService annotations = null) : SteerLibrary
         newVelocity = newVelocity.TruncateLength(MaxSpeed);
 
         // update Speed
-        Speed = (newVelocity.Length());
+        Speed = newVelocity.Length();
 
         // Euler integrate (per frame) velocity into position
-        Position = (Position + (newVelocity * elapsedTime));
+        Position = Position + (newVelocity * elapsedTime);
 
         // regenerate local space (by default: align vehicle's forward axis with
         // new velocity, but this behavior may be overridden by derived classes.)
@@ -128,18 +139,18 @@ public class SimpleVehicle(IAnnotationService annotations = null) : SteerLibrary
     {
         // the length of this global-upward-pointing vector controls the vehicle's
         // tendency to right itself as it is rolled over from turning acceleration
-        Vector3 globalUp = new Vector3(0, 0.2f, 0);
+        var globalUp = new Vector3(0, 0.2f, 0);
 
         // acceleration points toward the center of local path curvature, the
         // length determines how much the vehicle will roll while turning
-        Vector3 accelUp = acceleration * 0.05f;
+        var accelUp = acceleration * 0.05f;
 
         // combined banking, sum of UP due to turning and global UP
-        Vector3 bankUp = accelUp + globalUp;
+        var bankUp = accelUp + globalUp;
 
         // blend bankUp into vehicle's UP basis vector
-        float smoothRate = elapsedTime * 3;
-        Vector3 tempUp = Up;
+        var smoothRate = elapsedTime * 3;
+        var tempUp = Up;
         Utilities.BlendIntoAccumulator(smoothRate, bankUp, ref tempUp);
         Up = Vector3.Normalize(tempUp);
 
@@ -153,49 +164,43 @@ public class SimpleVehicle(IAnnotationService annotations = null) : SteerLibrary
     }
 
     /// <summary>
-    /// adjust the steering force passed to applySteeringForce.
-    /// allows a specific vehicle class to redefine this adjustment.
-    /// default is to disallow backward-facing steering at low speed.
+    ///     adjust the steering force passed to applySteeringForce.
+    ///     allows a specific vehicle class to redefine this adjustment.
+    ///     default is to disallow backward-facing steering at low speed.
     /// </summary>
     /// <param name="force"></param>
     /// <param name="deltaTime"></param>
     /// <returns></returns>
     protected virtual Vector3 AdjustRawSteeringForce(Vector3 force, float deltaTime)
     {
-        float maxAdjustedSpeed = 0.2f * MaxSpeed;
+        var maxAdjustedSpeed = 0.2f * MaxSpeed;
 
-        if ((Speed > maxAdjustedSpeed) || (force == Vector3.Zero))
+        if (Speed > maxAdjustedSpeed || force == Vector3.Zero)
             return force;
 
-        float range = Speed / maxAdjustedSpeed;
-        float cosine = Utilities.Lerp(1.0f, -1.0f, (float)Math.Pow(range, 20));
+        var range = Speed / maxAdjustedSpeed;
+        var cosine = Utilities.Lerp(1.0f, -1.0f, (float)Math.Pow(range, 20));
         return force.LimitMaxDeviationAngle(cosine, Forward);
     }
 
     /// <summary>
-    /// apply a given braking force (for a given dt) to our momentum.
+    ///     apply a given braking force (for a given dt) to our momentum.
     /// </summary>
     /// <param name="rate"></param>
     /// <param name="deltaTime"></param>
     public void ApplyBrakingForce(float rate, float deltaTime)
     {
-        float rawBraking = Speed * rate;
-        float clipBraking = ((rawBraking < MaxForce) ? rawBraking : MaxForce);
-        Speed = (Speed - (clipBraking * deltaTime));
+        var rawBraking = Speed * rate;
+        var clipBraking = rawBraking < MaxForce ? rawBraking : MaxForce;
+        Speed = Speed - (clipBraking * deltaTime);
     }
 
     /// <summary>
-    /// predict position of this vehicle at some time in the future (assumes velocity remains constant)
+    ///     predict position of this vehicle at some time in the future (assumes velocity remains constant)
     /// </summary>
     /// <param name="predictionTime"></param>
     /// <returns></returns>
     public override Vector3 PredictFuturePosition(float predictionTime) => Position + (Velocity * predictionTime);
-
-    // get instantaneous curvature (since last update)
-    protected float Curvature { get; private set; }
-
-    // get/reset smoothedCurvature, smoothedAcceleration and smoothedPosition
-    public float SmoothedCurvature => smoothedCurvature;
 
     void ResetSmoothedCurvature(float value = 0)
     {
@@ -205,14 +210,9 @@ public class SimpleVehicle(IAnnotationService annotations = null) : SteerLibrary
         Curvature = value;
     }
 
-    public override Vector3 Acceleration => acceleration;
-
     protected void ResetAcceleration() => ResetAcceleration(Vector3.Zero);
 
     void ResetAcceleration(Vector3 value) => acceleration = value;
-
-    Vector3 smoothedPosition;
-    public Vector3 SmoothedPosition => smoothedPosition;
 
     void ResetSmoothedPosition() => ResetSmoothedPosition(Vector3.Zero);
 
@@ -232,10 +232,10 @@ public class SimpleVehicle(IAnnotationService annotations = null) : SteerLibrary
     {
         if (elapsedTime > 0)
         {
-            Vector3 dP = lastPosition - Position;
-            Vector3 dF = (lastForward - Forward) / dP.Length();
-            Vector3 lateral = Vector3Helpers.PerpendicularComponent(dF, Forward);
-            float sign = (Vector3.Dot(lateral, Side) < 0) ? 1.0f : -1.0f;
+            var dP = lastPosition - Position;
+            var dF = (lastForward - Forward) / dP.Length();
+            var lateral = Vector3Helpers.PerpendicularComponent(dF, Forward);
+            var sign = Vector3.Dot(lateral, Side) < 0 ? 1.0f : -1.0f;
             Curvature = lateral.Length() * sign;
             Utilities.BlendIntoAccumulator(elapsedTime * 4.0f, Curvature, ref smoothedCurvature);
             lastForward = Forward;

@@ -11,29 +11,29 @@
 namespace SharpSteer2;
 
 /// <summary>
-/// transformation as three orthonormal unit basis vectors and the
-/// origin of the local space.  These correspond to the "rows" of
-/// a 3x4 transformation matrix with [0 0 0 1] as the final column
+///     transformation as three orthonormal unit basis vectors and the
+///     origin of the local space.  These correspond to the "rows" of
+///     a 3x4 transformation matrix with [0 0 0 1] as the final column
 /// </summary>
 public interface ILocalSpaceBasis
 {
     /// <summary>
-    /// side-pointing unit basis vector
+    ///     side-pointing unit basis vector
     /// </summary>
     Vector3 Side { get; }
 
     /// <summary>
-    /// upward-pointing unit basis vector
+    ///     upward-pointing unit basis vector
     /// </summary>
     Vector3 Up { get; }
 
     /// <summary>
-    /// forward-pointing unit basis vector
+    ///     forward-pointing unit basis vector
     /// </summary>
     Vector3 Forward { get; }
 
     /// <summary>
-    /// origin of local space
+    ///     origin of local space
     /// </summary>
     Vector3 Position { get; }
 }

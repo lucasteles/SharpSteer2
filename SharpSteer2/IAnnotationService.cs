@@ -11,12 +11,12 @@
 namespace SharpSteer2;
 
 /// <summary>
-/// Provides methods to annotate the steering behaviors.
+///     Provides methods to annotate the steering behaviors.
 /// </summary>
 public interface IAnnotationService
 {
     /// <summary>
-    /// Indicates whether annotation is enabled.
+    ///     Indicates whether annotation is enabled.
     /// </summary>
     bool IsEnabled { get; set; }
 
@@ -33,7 +33,7 @@ public interface IAnnotationService
     //       "segments" is the number of line segments used to draw the circle
 
     /// <summary>
-    /// Draws an opaque colored line segment between two locations in space.
+    ///     Draws an opaque colored line segment between two locations in space.
     /// </summary>
     /// <param name="startPoint">The start point of the line.</param>
     /// <param name="endPoint">The end point of the line.</param>
@@ -42,7 +42,7 @@ public interface IAnnotationService
     void Line(Vector3 startPoint, Vector3 endPoint, Vector3 color, float opacity = 1);
 
     /// <summary>
-    /// Draws a circle on the XZ plane.
+    ///     Draws a circle on the XZ plane.
     /// </summary>
     /// <param name="radius">The radius of the circle.</param>
     /// <param name="center">The center of the circle.</param>
@@ -51,7 +51,7 @@ public interface IAnnotationService
     void CircleXz(float radius, Vector3 center, Vector3 color, int segments);
 
     /// <summary>
-    /// Draws a disk on the XZ plane.
+    ///     Draws a disk on the XZ plane.
     /// </summary>
     /// <param name="radius">The radius of the disk.</param>
     /// <param name="center">The center of the disk.</param>
@@ -60,7 +60,7 @@ public interface IAnnotationService
     void DiskXz(float radius, Vector3 center, Vector3 color, int segments);
 
     /// <summary>
-    /// Draws a circle perpendicular to the given axis.
+    ///     Draws a circle perpendicular to the given axis.
     /// </summary>
     /// <param name="radius">The radius of the circle.</param>
     /// <param name="center">The center of the circle.</param>
@@ -70,7 +70,7 @@ public interface IAnnotationService
     void Circle3D(float radius, Vector3 center, Vector3 axis, Vector3 color, int segments);
 
     /// <summary>
-    /// Draws a disk perpendicular to the given axis.
+    ///     Draws a disk perpendicular to the given axis.
     /// </summary>
     /// <param name="radius">The radius of the disk.</param>
     /// <param name="center">The center of the disk.</param>
@@ -80,7 +80,7 @@ public interface IAnnotationService
     void Disk3D(float radius, Vector3 center, Vector3 axis, Vector3 color, int segments);
 
     /// <summary>
-    /// Draws a circle (not filled) or disk (filled) on the XZ plane.
+    ///     Draws a circle (not filled) or disk (filled) on the XZ plane.
     /// </summary>
     /// <param name="radius">The radius of the circle/disk.</param>
     /// <param name="center">The center of the circle/disk.</param>
@@ -90,7 +90,7 @@ public interface IAnnotationService
     void CircleOrDiskXz(float radius, Vector3 center, Vector3 color, int segments, bool filled);
 
     /// <summary>
-    /// Draws a circle (not filled) or disk (filled) perpendicular to the given axis.
+    ///     Draws a circle (not filled) or disk (filled) perpendicular to the given axis.
     /// </summary>
     /// <param name="radius">The radius of the circle/disk.</param>
     /// <param name="center">The center of the circle/disk.</param>
@@ -101,7 +101,7 @@ public interface IAnnotationService
     void CircleOrDisk3D(float radius, Vector3 center, Vector3 axis, Vector3 color, int segments, bool filled);
 
     /// <summary>
-    /// Draws a circle (not filled) or disk (filled) perpendicular to the given axis.
+    ///     Draws a circle (not filled) or disk (filled) perpendicular to the given axis.
     /// </summary>
     /// <param name="radius">The radius of the circle/disk.</param>
     /// <param name="axis">The axis of the circle/disk.</param>
@@ -113,13 +113,13 @@ public interface IAnnotationService
     void CircleOrDisk(float radius, Vector3 axis, Vector3 center, Vector3 color, int segments, bool filled, bool in3D);
 
     /// <summary>
-    /// Called when steerToAvoidObstacles decides steering is required.
+    ///     Called when steerToAvoidObstacles decides steering is required.
     /// </summary>
     /// <param name="minDistanceToCollision"></param>
     void AvoidObstacle(float minDistanceToCollision);
 
     /// <summary>
-    /// Called when steerToFollowPath decides steering is required.
+    ///     Called when steerToFollowPath decides steering is required.
     /// </summary>
     /// <param name="future"></param>
     /// <param name="onPath"></param>
@@ -128,14 +128,14 @@ public interface IAnnotationService
     void PathFollowing(Vector3 future, Vector3 onPath, Vector3 target, float outside);
 
     /// <summary>
-    /// Called when steerToAvoidCloseNeighbors decides steering is required.
+    ///     Called when steerToAvoidCloseNeighbors decides steering is required.
     /// </summary>
     /// <param name="other"></param>
     /// <param name="additionalDistance"></param>
     void AvoidCloseNeighbor(IVehicle other, float additionalDistance);
 
     /// <summary>
-    /// Called when steerToAvoidNeighbors decides steering is required.
+    ///     Called when steerToAvoidNeighbors decides steering is required.
     /// </summary>
     /// <param name="threat"></param>
     /// <param name="steer"></param>
@@ -144,20 +144,20 @@ public interface IAnnotationService
     void AvoidNeighbor(IVehicle threat, float steer, Vector3 ourFuture, Vector3 threatFuture);
 
     /// <summary>
-    /// Draws lines from the vehicle's position showing its velocity and acceleration.
+    ///     Draws lines from the vehicle's position showing its velocity and acceleration.
     /// </summary>
     /// <param name="vehicle">The vehicle to annotate.</param>
     void VelocityAcceleration(IVehicle vehicle);
 
     /// <summary>
-    /// Draws lines from the vehicle's position showing its velocity and acceleration.
+    ///     Draws lines from the vehicle's position showing its velocity and acceleration.
     /// </summary>
     /// <param name="vehicle">The vehicle to annotate.</param>
     /// <param name="maxLength">The maximum length for the acceleration and velocity lines.</param>
     void VelocityAcceleration(IVehicle vehicle, float maxLength);
 
     /// <summary>
-    /// Draws lines from the vehicle's position showing its velocity and acceleration.
+    ///     Draws lines from the vehicle's position showing its velocity and acceleration.
     /// </summary>
     /// <param name="vehicle">The vehicle to annotate.</param>
     /// <param name="maxLengthAcceleration">The maximum length for the acceleration line.</param>

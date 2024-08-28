@@ -4,16 +4,14 @@ using SharpSteer2.Helpers;
 namespace SharpSteer2.Tests;
 
 /// <summary>
-///This is a test class for UtilitiesTest and is intended
-///to contain all UtilitiesTest Unit Tests
-///</summary>
+///     This is a test class for UtilitiesTest and is intended
+///     to contain all UtilitiesTest Unit Tests
+/// </summary>
 [TestClass]
 public class UtilitiesTest
 {
     [TestMethod]
-    public void Random()
-    {
-    }
+    public void Random() { }
 
     [TestMethod]
     public void ScalarRandomWalk()
@@ -143,7 +141,7 @@ public class UtilitiesTest
     [TestMethod]
     public void Vector3BlendIntoAccumulator()
     {
-        Vector3 smoothedValue = Vector3.One;
+        var smoothedValue = Vector3.One;
         Utilities.BlendIntoAccumulator(0.5f, new(2, 2, 2), ref smoothedValue);
 
         Assert.AreEqual(Vector3.Lerp(Vector3.One, new(2), 0.5f), smoothedValue);

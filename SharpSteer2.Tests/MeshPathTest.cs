@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using SharpSteer2.Helpers;
+﻿using SharpSteer2.Helpers;
 using SharpSteer2.Pathway;
 
 namespace SharpSteer2.Tests;
@@ -8,6 +7,7 @@ namespace SharpSteer2.Tests;
 public class MeshPathwayTest
 {
     #region MeshPath.TriangleData
+
     TrianglePathway.Triangle triangle = new(
         new(0, 0, 0),
         new(0, 0, 1),
@@ -20,7 +20,7 @@ public class MeshPathwayTest
         float s;
         float t;
         bool inside;
-        Vector3 closest = TrianglePathway.ClosestPointOnTriangle(ref triangle, new(-1, 0, 0.5f), out s, out t, out inside);
+        var closest = TrianglePathway.ClosestPointOnTriangle(ref triangle, new(-1, 0, 0.5f), out s, out t, out inside);
 
         Assert.IsFalse(inside);
         Assert.AreEqual(0.0f, closest.X, float.Epsilon);
@@ -36,7 +36,8 @@ public class MeshPathwayTest
         float s;
         float t;
         bool inside;
-        Vector3 closest = TrianglePathway.ClosestPointOnTriangle(ref triangle, new(0.6f, 0, 0.6f), out s, out t, out inside);
+        var closest =
+            TrianglePathway.ClosestPointOnTriangle(ref triangle, new(0.6f, 0, 0.6f), out s, out t, out inside);
 
         Assert.IsFalse(inside);
         Assert.AreEqual(0.5f, closest.X, float.Epsilon);
@@ -52,7 +53,7 @@ public class MeshPathwayTest
         float s;
         float t;
         bool inside;
-        Vector3 closest = TrianglePathway.ClosestPointOnTriangle(ref triangle, new(0.5f, 0, -1f), out s, out t, out inside);
+        var closest = TrianglePathway.ClosestPointOnTriangle(ref triangle, new(0.5f, 0, -1f), out s, out t, out inside);
 
         Assert.IsFalse(inside);
         Assert.AreEqual(0.5f, closest.X, float.Epsilon);
@@ -68,7 +69,7 @@ public class MeshPathwayTest
         float s;
         float t;
         bool inside;
-        Vector3 closest = TrianglePathway.ClosestPointOnTriangle(ref triangle, new(-1f, 0, -1f), out s, out t, out inside);
+        var closest = TrianglePathway.ClosestPointOnTriangle(ref triangle, new(-1f, 0, -1f), out s, out t, out inside);
 
         Assert.IsFalse(inside);
         Assert.AreEqual(0.0f, closest.X, float.Epsilon);
@@ -84,7 +85,7 @@ public class MeshPathwayTest
         float s;
         float t;
         bool inside;
-        Vector3 closest = TrianglePathway.ClosestPointOnTriangle(ref triangle, new(0f, 0, 2f), out s, out t, out inside);
+        var closest = TrianglePathway.ClosestPointOnTriangle(ref triangle, new(0f, 0, 2f), out s, out t, out inside);
 
         Assert.IsFalse(inside);
         Assert.AreEqual(0.0f, closest.X, float.Epsilon);
@@ -100,7 +101,7 @@ public class MeshPathwayTest
         float s;
         float t;
         bool inside;
-        Vector3 closest = TrianglePathway.ClosestPointOnTriangle(ref triangle, new(2f, 0, 0f), out s, out t, out inside);
+        var closest = TrianglePathway.ClosestPointOnTriangle(ref triangle, new(2f, 0, 0f), out s, out t, out inside);
 
         Assert.IsFalse(inside);
         Assert.AreEqual(1.0f, closest.X, float.Epsilon);
@@ -116,7 +117,8 @@ public class MeshPathwayTest
         float s;
         float t;
         bool inside;
-        Vector3 closest = TrianglePathway.ClosestPointOnTriangle(ref triangle, new(0.1f, 0, 0.5f), out s, out t, out inside);
+        var closest =
+            TrianglePathway.ClosestPointOnTriangle(ref triangle, new(0.1f, 0, 0.5f), out s, out t, out inside);
 
         Assert.IsTrue(inside);
         Assert.AreEqual(0.1f, closest.X, float.Epsilon);
@@ -132,7 +134,8 @@ public class MeshPathwayTest
         float s;
         float t;
         bool inside;
-        Vector3 closest = TrianglePathway.ClosestPointOnTriangle(ref triangle, new(0.4f, 0, 0.4f), out s, out t, out inside);
+        var closest =
+            TrianglePathway.ClosestPointOnTriangle(ref triangle, new(0.4f, 0, 0.4f), out s, out t, out inside);
 
         Assert.IsTrue(inside);
         Assert.AreEqual(0.4f, closest.X, float.Epsilon);
@@ -148,7 +151,8 @@ public class MeshPathwayTest
         float s;
         float t;
         bool inside;
-        Vector3 closest = TrianglePathway.ClosestPointOnTriangle(ref triangle, new(0.5f, 0, 0.1f), out s, out t, out inside);
+        var closest =
+            TrianglePathway.ClosestPointOnTriangle(ref triangle, new(0.5f, 0, 0.1f), out s, out t, out inside);
 
         Assert.IsTrue(inside);
         Assert.AreEqual(0.5f, closest.X, float.Epsilon);
@@ -157,6 +161,7 @@ public class MeshPathwayTest
         Assert.AreEqual(0.1f, s, float.Epsilon);
         Assert.AreEqual(0.5f, t, float.Epsilon);
     }
+
     #endregion
 
     #region MeshPath
@@ -171,11 +176,12 @@ public class MeshPathwayTest
     [TestMethod]
     public void HowFarOutsidePath()
     {
-        float distance = path.HowFarOutsidePath(new(-1, 0, 0));
+        var distance = path.HowFarOutsidePath(new(-1, 0, 0));
         Assert.AreEqual(1, distance, float.Epsilon);
 
-        float distance1 = path.HowFarOutsidePath(new(3, 0, 1));
+        var distance1 = path.HowFarOutsidePath(new(3, 0, 1));
         Assert.AreEqual(1, distance1, float.Epsilon);
     }
+
     #endregion
 }

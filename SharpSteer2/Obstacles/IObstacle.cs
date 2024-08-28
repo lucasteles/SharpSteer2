@@ -11,8 +11,8 @@
 namespace SharpSteer2.Obstacles;
 
 /// <summary>
-/// Obstacle: a pure virtual base class for an abstract shape in space, to be
-/// used with obstacle avoidance.
+///     Obstacle: a pure virtual base class for an abstract shape in space, to be
+///     used with obstacle avoidance.
 /// </summary>
 public interface IObstacle
 {

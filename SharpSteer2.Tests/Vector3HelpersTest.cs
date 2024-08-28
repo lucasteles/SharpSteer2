@@ -11,11 +11,12 @@ public class Vector3HelpersTest
 
     static void AssertVectorEquality(Vector3 expected, Vector3 actual, float epsilon = float.Epsilon)
     {
-        Func<string> err = () => string.Format("expected {0} but got {1}", expected, actual);
+        Assert.AreEqual(expected.X, actual.X, epsilon, Err());
+        Assert.AreEqual(expected.Y, actual.Y, epsilon, Err());
+        Assert.AreEqual(expected.Z, actual.Z, epsilon, Err());
+        return;
 
-        Assert.AreEqual(expected.X, actual.X, epsilon, err());
-        Assert.AreEqual(expected.Y, actual.Y, epsilon, err());
-        Assert.AreEqual(expected.Z, actual.Z, epsilon, err());
+        string Err() => $"expected {expected} but got {actual}";
     }
 
     [TestMethod]
@@ -41,27 +42,32 @@ public class Vector3HelpersTest
     }
 
     [TestMethod]
-    public void TruncateVectorLengthDoesNotTruncateShortVector() => AssertVectorEquality(Vector3.UnitY, Vector3.UnitY.TruncateLength(2));
+    public void TruncateVectorLengthDoesNotTruncateShortVector() =>
+        AssertVectorEquality(Vector3.UnitY, Vector3.UnitY.TruncateLength(2));
 
     [TestMethod]
-    public void TruncateVectorLengthTruncatesLongVector() => AssertVectorEquality(Vector3.UnitY * 0.5f, Vector3.UnitY.TruncateLength(0.5f));
+    public void TruncateVectorLengthTruncatesLongVector() =>
+        AssertVectorEquality(Vector3.UnitY * 0.5f, Vector3.UnitY.TruncateLength(0.5f));
 
     [TestMethod]
-    public void RotateVectorAboutGlobalYClockwise() => AssertVectorEquality(new(1, 1, 0), new Vector3(0, 1, 1).RotateAboutGlobalY(PiOver2), 0.0000001f);
+    public void RotateVectorAboutGlobalYClockwise() =>
+        AssertVectorEquality(new(1, 1, 0), new Vector3(0, 1, 1).RotateAboutGlobalY(PiOver2), 0.0000001f);
 
     [TestMethod]
-    public void RotateVectorAboutGlobalYAntiClockwise() => AssertVectorEquality(new(1, 1, 0), new Vector3(0, 1, -1).RotateAboutGlobalY(-PiOver2), 0.0000001f);
+    public void RotateVectorAboutGlobalYAntiClockwise() => AssertVectorEquality(new(1, 1, 0),
+        new Vector3(0, 1, -1).RotateAboutGlobalY(-PiOver2), 0.0000001f);
 
     [TestMethod]
     public void RotateVectorAboutGlobalYClockwiseWithCache()
     {
         const float angle = PiOver2;
-        float sin = (float)Math.Sin(angle);
-        float cos = (float)Math.Cos(angle);
+        var sin = (float)Math.Sin(angle);
+        var cos = (float)Math.Cos(angle);
 
         float computedSin = 0;
         float computedCos = 0;
-        AssertVectorEquality(new(1, 1, 0), new Vector3(0, 1, 1).RotateAboutGlobalY(angle, ref computedSin, ref computedCos), 0.0000001f);
+        AssertVectorEquality(new(1, 1, 0),
+            new Vector3(0, 1, 1).RotateAboutGlobalY(angle, ref computedSin, ref computedCos), 0.0000001f);
 
         Assert.AreEqual(sin, computedSin);
         Assert.AreEqual(cos, computedCos);
@@ -71,12 +77,13 @@ public class Vector3HelpersTest
     public void RotateVectorAboutGlobalYAntiClockwiseWithCache()
     {
         const float angle = -PiOver2;
-        float sin = (float)Math.Sin(angle);
-        float cos = (float)Math.Cos(angle);
+        var sin = (float)Math.Sin(angle);
+        var cos = (float)Math.Cos(angle);
 
         float computedSin = 0;
         float computedCos = 0;
-        AssertVectorEquality(new(1, 1, 0), new Vector3(0, 1, -1).RotateAboutGlobalY(angle, ref computedSin, ref computedCos), 0.0000001f);
+        AssertVectorEquality(new(1, 1, 0),
+            new Vector3(0, 1, -1).RotateAboutGlobalY(angle, ref computedSin, ref computedCos), 0.0000001f);
 
         Assert.AreEqual(sin, computedSin);
         Assert.AreEqual(cos, computedCos);
@@ -85,9 +92,9 @@ public class Vector3HelpersTest
     [TestMethod]
     public void SperhicalWraparoundDoesNotChangeVectorInsideSphere()
     {
-        Vector3 pos = new Vector3(10, 11, 12);
+        var pos = new Vector3(10, 11, 12);
 
-        Vector3 center = Vector3.Zero;
+        var center = Vector3.Zero;
         const float radius = 20;
 
         Assert.AreEqual(pos, pos.SphericalWrapAround(center, radius));
@@ -96,9 +103,9 @@ public class Vector3HelpersTest
     [TestMethod]
     public void SperhicalWraparoundWrapsAround()
     {
-        Vector3 pos = new Vector3(0, 0, 30);
+        var pos = new Vector3(0, 0, 30);
 
-        Vector3 center = Vector3.Zero;
+        var center = Vector3.Zero;
         const float radius = 20;
 
         Assert.AreEqual(new(0, 0, -10), pos.SphericalWrapAround(center, radius));
@@ -107,9 +114,9 @@ public class Vector3HelpersTest
     [TestMethod]
     public void SperhicalWraparoundWrapsAroundVeryLargeValue()
     {
-        Vector3 pos = new Vector3(0, 0, 90);
+        var pos = new Vector3(0, 0, 90);
 
-        Vector3 center = Vector3.Zero;
+        var center = Vector3.Zero;
         const float radius = 20;
 
         Assert.AreEqual(new(0, 0, 10), pos.SphericalWrapAround(center, radius));
@@ -117,16 +124,16 @@ public class Vector3HelpersTest
 
     static void BitsetDirections(Vector3 a, ref int bitset)
     {
-        bitset |= (a.X > 0 ? 1 : 2);
-        bitset |= (a.Y > 0 ? 4 : 8);
-        bitset |= (a.Z > 0 ? 16 : 32);
+        bitset |= a.X > 0 ? 1 : 2;
+        bitset |= a.Y > 0 ? 4 : 8;
+        bitset |= a.Z > 0 ? 16 : 32;
     }
 
     [TestMethod]
     public void RandomVectorOnUnitRadiusXZDiskIsAlwaysWithinOneUnitOfOrigin()
     {
-        int set = 0;
-        for (int i = 0; i < 1000; i++)
+        var set = 0;
+        for (var i = 0; i < 1000; i++)
         {
             var v = Vector3Helpers.RandomVectorOnUnitRadiusXZDisk();
             Assert.IsTrue(v.Length() <= 1);
@@ -140,8 +147,8 @@ public class Vector3HelpersTest
     [TestMethod]
     public void RandomVectorInUnitRadiusSphereIsAlwaysWithinOneUnitOfOrigin()
     {
-        int set = 0;
-        for (int i = 0; i < 1000; i++)
+        var set = 0;
+        for (var i = 0; i < 1000; i++)
         {
             var v = Vector3Helpers.RandomVectorInUnitRadiusSphere();
             Assert.IsTrue(v.Length() <= 1);
@@ -155,8 +162,8 @@ public class Vector3HelpersTest
     [TestMethod]
     public void RandomUnitVectorIsAlwaysLengthOne()
     {
-        int set = 0;
-        for (int i = 0; i < 1000; i++)
+        var set = 0;
+        for (var i = 0; i < 1000; i++)
         {
             var v = Vector3Helpers.RandomUnitVector();
             Assert.IsTrue(Math.Abs(v.Length() - 1) < 0.000001f);
@@ -170,8 +177,8 @@ public class Vector3HelpersTest
     [TestMethod]
     public void RandomUnitVectorOnXzPlaneIsAlwaysLengthOne()
     {
-        int set = 0;
-        for (int i = 0; i < 1000; i++)
+        var set = 0;
+        for (var i = 0; i < 1000; i++)
         {
             var v = Vector3Helpers.RandomUnitVectorOnXZPlane();
             Assert.IsTrue(Math.Abs(v.Length() - 1) < 0.000001f);
@@ -185,10 +192,10 @@ public class Vector3HelpersTest
     [TestMethod]
     public void DistanceFromLineTest()
     {
-        Vector3 point = new Vector3(0, 100, 0);
+        var point = new Vector3(0, 100, 0);
 
-        Vector3 origin = Vector3.Zero;
-        Vector3 direction = new Vector3(1, 0, 0);
+        var origin = Vector3.Zero;
+        var direction = new Vector3(1, 0, 0);
 
         Assert.AreEqual(100, point.DistanceFromLine(origin, direction));
     }
@@ -196,9 +203,9 @@ public class Vector3HelpersTest
     [TestMethod]
     public void FindPerpendicularIn3dIsAlwaysPerpendicular()
     {
-        int set = 0;
+        var set = 0;
 
-        for (int i = 0; i < 1000; i++)
+        for (var i = 0; i < 1000; i++)
         {
             var v = Vector3Helpers.RandomUnitVector();
             var perp = v.FindPerpendicularIn3d();
@@ -214,7 +221,7 @@ public class Vector3HelpersTest
     [TestMethod]
     public void ClipWithinConeIsAlwaysWithinCone()
     {
-        for (int i = 0; i < 5000; i++)
+        for (var i = 0; i < 5000; i++)
         {
             var vector = Vector3Helpers.RandomUnitVector();
 
@@ -231,7 +238,7 @@ public class Vector3HelpersTest
     [TestMethod]
     public void ClipWithoutConeIsAlwaysWithoutCone()
     {
-        for (int i = 0; i < 5000; i++)
+        for (var i = 0; i < 5000; i++)
         {
             var vector = Vector3Helpers.RandomUnitVector();
 
@@ -246,11 +253,14 @@ public class Vector3HelpersTest
     }
 
     [TestMethod]
-    public void ClipWithinConeReturnsZeroLengthVectors() => Assert.AreEqual(Vector3.Zero, Vector3.Zero.LimitMaxDeviationAngle(0.2f, Vector3.UnitY));
+    public void ClipWithinConeReturnsZeroLengthVectors() =>
+        Assert.AreEqual(Vector3.Zero, Vector3.Zero.LimitMaxDeviationAngle(0.2f, Vector3.UnitY));
 
     [TestMethod]
-    public void ClipBackwardsVectorIsZero() => Assert.AreEqual(Vector3.Zero, Vector3.UnitZ.LimitMaxDeviationAngle(0.2f, -Vector3.UnitZ));
+    public void ClipBackwardsVectorIsZero() =>
+        Assert.AreEqual(Vector3.Zero, Vector3.UnitZ.LimitMaxDeviationAngle(0.2f, -Vector3.UnitZ));
 
     [TestMethod]
-    public void ClipWithoutConeReturnsZeroLengthVectors() => Assert.AreEqual(Vector3.Zero, Vector3.Zero.LimitMinDeviationAngle(0.2f, Vector3.UnitY));
+    public void ClipWithoutConeReturnsZeroLengthVectors() =>
+        Assert.AreEqual(Vector3.Zero, Vector3.Zero.LimitMinDeviationAngle(0.2f, Vector3.UnitY));
 }

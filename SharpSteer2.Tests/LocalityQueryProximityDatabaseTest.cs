@@ -28,12 +28,12 @@ public class LocalityQueryProximityDatabaseTest
         token.UpdateForNewPosition(Vector3.Zero);
     }
 
-    static ITokenForProximityDatabase<object> CreateToken(IProximityDatabase<object> db, Vector3 position, IDictionary<object, Vector3> lookup)
+    static ITokenForProximityDatabase<object> CreateToken(IProximityDatabase<object> db, Vector3 position,
+        IDictionary<object, Vector3>? lookup)
     {
-        var obj = new object();
+        object obj = new();
 
-        if (lookup != null)
-            lookup.Add(obj, position);
+        lookup?.Add(obj, position);
 
         var token = db.AllocateToken(obj);
         token.UpdateForNewPosition(position);
@@ -90,7 +90,7 @@ public class LocalityQueryProximityDatabaseTest
         Assert.AreEqual(1, list.Count);
 
         list.Clear();
-        token.FindNeighbors(new(3, 0, 0),1.1f, list);
+        token.FindNeighbors(new(3, 0, 0), 1.1f, list);
         Assert.AreEqual(2, list.Count);
     }
 

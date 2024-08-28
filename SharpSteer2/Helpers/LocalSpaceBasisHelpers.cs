@@ -3,17 +3,18 @@
 public static class LocalSpaceBasisHelpers
 {
     /// <summary>
-    /// Transforms a direction in global space to its equivalent in local space.
+    ///     Transforms a direction in global space to its equivalent in local space.
     /// </summary>
     /// <param name="basis">The basis which this should operate on</param>
     /// <param name="globalDirection">The global space direction to transform.</param>
     /// <returns>The global space direction transformed to local space .</returns>
     public static Vector3 LocalizeDirection(this ILocalSpaceBasis basis, Vector3 globalDirection) =>
         // dot offset with local basis vectors to obtain local coordiantes
-        new(Vector3.Dot(globalDirection, basis.Side), Vector3.Dot(globalDirection, basis.Up), Vector3.Dot(globalDirection, basis.Forward));
+        new(Vector3.Dot(globalDirection, basis.Side), Vector3.Dot(globalDirection, basis.Up),
+            Vector3.Dot(globalDirection, basis.Forward));
 
     /// <summary>
-    /// Transforms a point in global space to its equivalent in local space.
+    ///     Transforms a point in global space to its equivalent in local space.
     /// </summary>
     /// <param name="basis">The basis which this should operate on</param>
     /// <param name="globalPosition">The global space position to transform.</param>
@@ -21,40 +22,42 @@ public static class LocalSpaceBasisHelpers
     public static Vector3 LocalizePosition(this ILocalSpaceBasis basis, Vector3 globalPosition)
     {
         // global offset from local origin
-        Vector3 globalOffset = globalPosition - basis.Position;
+        var globalOffset = globalPosition - basis.Position;
 
         // dot offset with local basis vectors to obtain local coordiantes
         return LocalizeDirection(basis, globalOffset);
     }
 
     /// <summary>
-    /// Transforms a point in local space to its equivalent in global space.
+    ///     Transforms a point in local space to its equivalent in global space.
     /// </summary>
     /// <param name="basis">The basis which this should operate on</param>
     /// <param name="localPosition">The local space position to tranform.</param>
     /// <returns>The local space position transformed to global space.</returns>
-    public static Vector3 GlobalizePosition(this ILocalSpaceBasis basis, Vector3 localPosition) => basis.Position + GlobalizeDirection(basis, localPosition);
+    public static Vector3 GlobalizePosition(this ILocalSpaceBasis basis, Vector3 localPosition) =>
+        basis.Position + GlobalizeDirection(basis, localPosition);
 
     /// <summary>
-    /// Transforms a direction in local space to its equivalent in global space.
+    ///     Transforms a direction in local space to its equivalent in global space.
     /// </summary>
     /// <param name="basis">The basis which this should operate on</param>
     /// <param name="localDirection">The local space direction to tranform.</param>
     /// <returns>The local space direction transformed to global space</returns>
     public static Vector3 GlobalizeDirection(this ILocalSpaceBasis basis, Vector3 localDirection) =>
-        ((basis.Side * localDirection.X) +
-         (basis.Up * localDirection.Y) +
-         (basis.Forward * localDirection.Z));
+        (basis.Side * localDirection.X) +
+        (basis.Up * localDirection.Y) +
+        (basis.Forward * localDirection.Z);
 
     /// <summary>
-    /// Rotates, in the canonical direction, a vector pointing in the
-    /// "forward" (+Z) direction to the "side" (+/-X) direction as implied
-    /// by IsRightHanded.
+    ///     Rotates, in the canonical direction, a vector pointing in the
+    ///     "forward" (+Z) direction to the "side" (+/-X) direction as implied
+    ///     by IsRightHanded.
     /// </summary>
     /// <param name="basis">The basis which this should operate on</param>
     /// <param name="value">The local space vector.</param>
     /// <returns>The rotated vector.</returns>
-    public static Vector3 LocalRotateForwardToSide(this ILocalSpaceBasis basis, Vector3 value) => new(-value.Z, value.Y, value.X);
+    public static Vector3 LocalRotateForwardToSide(this ILocalSpaceBasis basis, Vector3 value) =>
+        new(-value.Z, value.Y, value.X);
 
     public static void ResetLocalSpace(out Vector3 forward, out Vector3 side, out Vector3 up, out Vector3 position)
     {
@@ -65,7 +68,7 @@ public static class LocalSpaceBasisHelpers
     }
 
     /// <summary>
-    /// set "side" basis vector to normalized cross product of forward and up
+    ///     set "side" basis vector to normalized cross product of forward and up
     /// </summary>
     /// <param name="forward"></param>
     /// <param name="side"></param>
@@ -75,14 +78,15 @@ public static class LocalSpaceBasisHelpers
         side = Vector3.Normalize(Vector3.Cross(forward, up));
 
     /// <summary>
-    /// regenerate the orthonormal basis vectors given a new forward
-    /// (which is expected to have unit length)
+    ///     regenerate the orthonormal basis vectors given a new forward
+    ///     (which is expected to have unit length)
     /// </summary>
     /// <param name="newUnitForward"></param>
     /// <param name="forward"></param>
     /// <param name="side"></param>
     /// <param name="up"></param>
-    public static void RegenerateOrthonormalBasisUF(Vector3 newUnitForward, out Vector3 forward, out Vector3 side, ref Vector3 up)
+    public static void RegenerateOrthonormalBasisUF(Vector3 newUnitForward, out Vector3 forward, out Vector3 side,
+        ref Vector3 up)
     {
         forward = newUnitForward;
 
@@ -96,33 +100,36 @@ public static class LocalSpaceBasisHelpers
     }
 
     /// <summary>
-    /// for when the new forward is NOT know to have unit length
+    ///     for when the new forward is NOT know to have unit length
     /// </summary>
     /// <param name="newForward"></param>
     /// <param name="forward"></param>
     /// <param name="side"></param>
     /// <param name="up"></param>
-    public static void RegenerateOrthonormalBasis(Vector3 newForward, out Vector3 forward, out Vector3 side, ref Vector3 up) => RegenerateOrthonormalBasisUF(Vector3.Normalize(newForward), out forward, out side, ref up);
+    public static void RegenerateOrthonormalBasis(Vector3 newForward, out Vector3 forward, out Vector3 side,
+        ref Vector3 up) => RegenerateOrthonormalBasisUF(Vector3.Normalize(newForward), out forward, out side, ref up);
 
     /// <summary>
-    /// for supplying both a new forward and and new up
+    ///     for supplying both a new forward and and new up
     /// </summary>
     /// <param name="newForward"></param>
     /// <param name="newUp"></param>
     /// <param name="forward"></param>
     /// <param name="side"></param>
     /// <param name="up"></param>
-    public static void RegenerateOrthonormalBasis(Vector3 newForward, Vector3 newUp, out Vector3 forward, out Vector3 side, out Vector3 up)
+    public static void RegenerateOrthonormalBasis(Vector3 newForward, Vector3 newUp, out Vector3 forward,
+        out Vector3 side, out Vector3 up)
     {
         up = newUp;
         RegenerateOrthonormalBasis(Vector3.Normalize(newForward), out forward, out side, ref up);
     }
 
-    public static Matrix4x4 ToMatrix(this ILocalSpaceBasis basis) => ToMatrix(basis.Forward, basis.Side, basis.Up, basis.Position);
+    public static Matrix4x4 ToMatrix(this ILocalSpaceBasis basis) =>
+        ToMatrix(basis.Forward, basis.Side, basis.Up, basis.Position);
 
     public static Matrix4x4 ToMatrix(Vector3 forward, Vector3 side, Vector3 up, Vector3 position)
     {
-        Matrix4x4 m = Matrix4x4.Identity;
+        var m = Matrix4x4.Identity;
         m.Translation = position;
         MatrixHelpers.Right(ref m, ref side);
         MatrixHelpers.Up(ref m, ref up);
@@ -131,7 +138,8 @@ public static class LocalSpaceBasisHelpers
         return m;
     }
 
-    public static void FromMatrix(Matrix4x4 transformation, out Vector3 forward, out Vector3 side, out Vector3 up, out Vector3 position)
+    public static void FromMatrix(Matrix4x4 transformation, out Vector3 forward, out Vector3 side, out Vector3 up,
+        out Vector3 position)
     {
         position = transformation.Translation;
         side = MatrixHelpers.Right(ref transformation);

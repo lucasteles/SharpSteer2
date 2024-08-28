@@ -5,10 +5,18 @@ namespace SharpSteer2.Helpers;
 
 public static class VehicleHelpers
 {
-    public static Vector3 SteerForWander(this IVehicle vehicle, float dt, ref float wanderSide, ref float wanderUp, IAnnotationService annotation = null)
+    static readonly float[,] pursuitFactors = new float[3, 3]
+    {
+        { 2, 2, 0.5f }, //Behind
+        { 4, 0.8f, 1 }, //Aside
+        { 0.85f, 1.8f, 4 }, //Ahead
+    };
+
+    public static Vector3 SteerForWander(this IVehicle vehicle, float dt, ref float wanderSide, ref float wanderUp,
+        IAnnotationService annotation = null)
     {
         // random walk WanderSide and WanderUp between -1 and +1
-        float speed = 12 * dt; // maybe this (12) should be an argument?
+        var speed = 12 * dt; // maybe this (12) should be an argument?
         wanderSide = Utilities.ScalarRandomWalk(wanderSide, speed, -1, +1);
         wanderUp = Utilities.ScalarRandomWalk(wanderUp, speed, -1, +1);
 
@@ -16,49 +24,54 @@ public static class VehicleHelpers
         return (vehicle.Side * wanderSide) + (vehicle.Up * wanderUp);
     }
 
-    public static Vector3 SteerForFlee(this IVehicle vehicle, Vector3 target, float maxSpeed, IAnnotationService annotation = null)
+    public static Vector3 SteerForFlee(this IVehicle vehicle, Vector3 target, float maxSpeed,
+        IAnnotationService annotation = null)
     {
-        Vector3 offset = vehicle.Position - target;
-        Vector3 desiredVelocity = offset.TruncateLength(maxSpeed); //xxxnew
+        var offset = vehicle.Position - target;
+        var desiredVelocity = offset.TruncateLength(maxSpeed); //xxxnew
         return desiredVelocity - vehicle.Velocity;
     }
 
-    public static Vector3 SteerForSeek(this IVehicle vehicle, Vector3 target, float maxSpeed, IAnnotationService annotation = null)
+    public static Vector3 SteerForSeek(this IVehicle vehicle, Vector3 target, float maxSpeed,
+        IAnnotationService annotation = null)
     {
-        Vector3 offset = target - vehicle.Position;
-        Vector3 desiredVelocity = offset.TruncateLength(maxSpeed); //xxxnew
+        var offset = target - vehicle.Position;
+        var desiredVelocity = offset.TruncateLength(maxSpeed); //xxxnew
         return desiredVelocity - vehicle.Velocity;
     }
 
-    public static Vector3 SteerForArrival(this IVehicle vehicle, Vector3 target, float maxSpeed, float slowingDistance, IAnnotationService annotation = null)
+    public static Vector3 SteerForArrival(this IVehicle vehicle, Vector3 target, float maxSpeed, float slowingDistance,
+        IAnnotationService annotation = null)
     {
-        Vector3 offset = target - vehicle.Position;
-        float distance = offset.Length();
-        float rampedSpeed = maxSpeed * (distance / slowingDistance);
-        float clippedSpeed = Math.Min(rampedSpeed, maxSpeed);
-        Vector3 desiredVelocity = (clippedSpeed / distance) * offset;
+        var offset = target - vehicle.Position;
+        var distance = offset.Length();
+        var rampedSpeed = maxSpeed * (distance / slowingDistance);
+        var clippedSpeed = Math.Min(rampedSpeed, maxSpeed);
+        var desiredVelocity = clippedSpeed / distance * offset;
         return desiredVelocity - vehicle.Velocity;
     }
 
-    public static Vector3 SteerToFollowFlowField(this IVehicle vehicle, IFlowField flowField, float maxSpeed, float predictionDistance, IAnnotationService annotation = null)
+    public static Vector3 SteerToFollowFlowField(this IVehicle vehicle, IFlowField flowField, float maxSpeed,
+        float predictionDistance, IAnnotationService annotation = null)
     {
         var futurePosition = vehicle.PredictFuturePosition(predictionDistance);
         var flow = flowField.Sample(futurePosition);
         return vehicle.Velocity - flow.TruncateLength(maxSpeed);
     }
 
-    public static Vector3 SteerToStayOnPath(this IVehicle vehicle, float predictionTime, IPathway path, float maxSpeed, IAnnotationService annotation = null)
+    public static Vector3 SteerToStayOnPath(this IVehicle vehicle, float predictionTime, IPathway path, float maxSpeed,
+        IAnnotationService annotation = null)
     {
         // predict our future position
-        Vector3 futurePosition = vehicle.PredictFuturePosition(predictionTime);
+        var futurePosition = vehicle.PredictFuturePosition(predictionTime);
 
         // find the point on the path nearest the predicted future position
         Vector3 tangent;
         float outside;
-        Vector3 onPath = path.MapPointToPath(futurePosition, out tangent, out outside);
+        var onPath = path.MapPointToPath(futurePosition, out tangent, out outside);
 
         if (outside < 0)
-            return Vector3.Zero;    // our predicted future position was in the path, return zero steering.
+            return Vector3.Zero; // our predicted future position was in the path, return zero steering.
 
         // our predicted future position was outside the path, need to
         // steer towards it.  Use onPath projection of futurePosition
@@ -69,37 +82,39 @@ public static class VehicleHelpers
         return vehicle.SteerForSeek(onPath, maxSpeed);
     }
 
-    public static Vector3 SteerToFollowPath(this IVehicle vehicle, bool direction, float predictionTime, IPathway path, float maxSpeed, IAnnotationService annotation = null)
+    public static Vector3 SteerToFollowPath(this IVehicle vehicle, bool direction, float predictionTime, IPathway path,
+        float maxSpeed, IAnnotationService annotation = null)
     {
         float pathDistance;
         return SteerToFollowPath(vehicle, direction, predictionTime, path, maxSpeed, out pathDistance, annotation);
     }
 
-    public static Vector3 SteerToFollowPath(this IVehicle vehicle, bool direction, float predictionTime, IPathway path, float maxSpeed, out float currentPathDistance, IAnnotationService annotation = null)
+    public static Vector3 SteerToFollowPath(this IVehicle vehicle, bool direction, float predictionTime, IPathway path,
+        float maxSpeed, out float currentPathDistance, IAnnotationService annotation = null)
     {
         // our goal will be offset from our path distance by this amount
-        float pathDistanceOffset = (direction ? 1 : -1) * predictionTime * vehicle.Speed;
+        var pathDistanceOffset = (direction ? 1 : -1) * predictionTime * vehicle.Speed;
 
         // predict our future position
-        Vector3 futurePosition = vehicle.PredictFuturePosition(predictionTime);
+        var futurePosition = vehicle.PredictFuturePosition(predictionTime);
 
         // measure distance along path of our current and predicted positions
         currentPathDistance = path.MapPointToPathDistance(vehicle.Position);
-        float futurePathDistance = path.MapPointToPathDistance(futurePosition);
+        var futurePathDistance = path.MapPointToPathDistance(futurePosition);
 
         // are we facing in the correction direction?
-        bool rightway = ((pathDistanceOffset > 0) ?
-            (currentPathDistance < futurePathDistance) :
-            (currentPathDistance > futurePathDistance));
+        var rightway = pathDistanceOffset > 0
+            ? currentPathDistance < futurePathDistance
+            : currentPathDistance > futurePathDistance;
 
         // find the point on the path nearest the predicted future position
         Vector3 tangent;
         float outside;
-        Vector3 onPath = path.MapPointToPath(futurePosition, out tangent, out outside);
+        var onPath = path.MapPointToPath(futurePosition, out tangent, out outside);
 
         // no steering is required if (a) our future position is inside
         // the path tube and (b) we are facing in the correct direction
-        if ((outside <= 0) && rightway)
+        if (outside <= 0 && rightway)
         {
             //We're going at max speed, in the right direction. don't need to do anything
             if (vehicle.Speed >= maxSpeed)
@@ -107,9 +122,9 @@ public static class VehicleHelpers
 
             //Predict vehicle position and sample multiple times, incresingly far along the path
             var seek = path.MapPointToPath(vehicle.PredictFuturePosition(predictionTime / 3), out tangent, out outside);
-            for (int i = 0; i < 3; i++)
+            for (var i = 0; i < 3; i++)
             {
-                var s = path.MapPointToPath(seek + tangent * vehicle.Speed / (i + 1), out tangent, out outside);
+                var s = path.MapPointToPath(seek + (tangent * vehicle.Speed / (i + 1)), out tangent, out outside);
 
                 //terminate search if we wander outside the path
                 if (outside > 0)
@@ -126,8 +141,8 @@ public static class VehicleHelpers
 
         // otherwise we need to steer towards a target point obtained
         // by adding pathDistanceOffset to our current path position
-        float targetPathDistance = currentPathDistance + pathDistanceOffset;
-        Vector3 target = path.MapPathDistanceToPoint(targetPathDistance);
+        var targetPathDistance = currentPathDistance + pathDistanceOffset;
+        var target = path.MapPathDistanceToPoint(targetPathDistance);
 
         if (annotation != null)
             annotation.PathFollowing(futurePosition, onPath, target, outside);
@@ -137,22 +152,23 @@ public static class VehicleHelpers
     }
 
     /// <summary>
-    /// Returns a steering force to avoid a given obstacle.  The purely
-    /// lateral steering force will turn our this towards a silhouette edge
-    /// of the obstacle.  Avoidance is required when (1) the obstacle
-    /// intersects the this's current path, (2) it is in front of the
-    /// this, and (3) is within minTimeToCollision seconds of travel at the
-    /// this's current velocity.  Returns a zero vector value (Vector3::zero)
-    /// when no avoidance is required.
+    ///     Returns a steering force to avoid a given obstacle.  The purely
+    ///     lateral steering force will turn our this towards a silhouette edge
+    ///     of the obstacle.  Avoidance is required when (1) the obstacle
+    ///     intersects the this's current path, (2) it is in front of the
+    ///     this, and (3) is within minTimeToCollision seconds of travel at the
+    ///     this's current velocity.  Returns a zero vector value (Vector3::zero)
+    ///     when no avoidance is required.
     /// </summary>
     /// <param name="vehicle"></param>
     /// <param name="minTimeToCollision"></param>
     /// <param name="obstacle"></param>
     /// <param name="annotation"></param>
     /// <returns></returns>
-    public static Vector3 SteerToAvoidObstacle(this IVehicle vehicle, float minTimeToCollision, IObstacle obstacle, IAnnotationService annotation = null)
+    public static Vector3 SteerToAvoidObstacle(this IVehicle vehicle, float minTimeToCollision, IObstacle obstacle,
+        IAnnotationService annotation = null)
     {
-        Vector3 avoidance = obstacle.SteerToAvoid(vehicle, minTimeToCollision);
+        var avoidance = obstacle.SteerToAvoid(vehicle, minTimeToCollision);
 
         // XXX more annotation modularity problems (assumes spherical obstacle)
         if (avoidance != Vector3.Zero && annotation != null)
@@ -161,10 +177,11 @@ public static class VehicleHelpers
         return avoidance;
     }
 
-    public static Vector3 SteerToAvoidObstacles(this IVehicle vehicle, float minTimeToCollision, IEnumerable<IObstacle> obstacles, IAnnotationService annotation = null)
+    public static Vector3 SteerToAvoidObstacles(this IVehicle vehicle, float minTimeToCollision,
+        IEnumerable<IObstacle> obstacles, IAnnotationService annotation = null)
     {
         PathIntersection? nearest = null;
-        float minDistanceToCollision = minTimeToCollision * vehicle.Speed;
+        var minDistanceToCollision = minTimeToCollision * vehicle.Speed;
 
         // test all obstacles for intersection with my forward axis,
         // select the one whose point of intersection is nearest
@@ -174,8 +191,12 @@ public static class VehicleHelpers
             if (!next.HasValue)
                 continue;
 
-            if (!nearest.HasValue || (next.Value < nearest.Value.Distance))
-                nearest = new PathIntersection { Distance = next.Value, Obstacle = o };
+            if (!nearest.HasValue || next.Value < nearest.Value.Distance)
+                nearest = new PathIntersection
+                {
+                    Distance = next.Value,
+                    Obstacle = o,
+                };
         }
 
         if (nearest.HasValue)
@@ -185,20 +206,16 @@ public static class VehicleHelpers
 
             return nearest.Value.Obstacle.SteerToAvoid(vehicle, minTimeToCollision);
         }
+
         return Vector3.Zero;
     }
 
-    struct PathIntersection
-    {
-        public float Distance;
-        public IObstacle Obstacle;
-    }
-
-    public static Vector3 SteerForSeparation(this IVehicle vehicle, float maxDistance, float cosMaxAngle, IEnumerable<IVehicle> others, IAnnotationService annotation = null)
+    public static Vector3 SteerForSeparation(this IVehicle vehicle, float maxDistance, float cosMaxAngle,
+        IEnumerable<IVehicle> others, IAnnotationService annotation = null)
     {
         // steering accumulator and count of neighbors, both initially zero
-        Vector3 steering = Vector3.Zero;
-        int neighbors = 0;
+        var steering = Vector3.Zero;
+        var neighbors = 0;
 
         // for each of the other vehicles...
         foreach (var other in others)
@@ -209,9 +226,9 @@ public static class VehicleHelpers
             // add in steering contribution
             // (opposite of the offset direction, divided once by distance
             // to normalize, divided another time to get 1/d falloff)
-            Vector3 offset = other.Position - vehicle.Position;
-            float distanceSquared = Vector3.Dot(offset, offset);
-            steering += (offset / -distanceSquared);
+            var offset = other.Position - vehicle.Position;
+            var distanceSquared = Vector3.Dot(offset, offset);
+            steering += offset / -distanceSquared;
 
             // count neighbors
             neighbors++;
@@ -227,12 +244,12 @@ public static class VehicleHelpers
     }
 
     /// <summary>
-    /// avoidance of "close neighbors"
+    ///     avoidance of "close neighbors"
     /// </summary>
     /// <remarks>
-    /// Does a hard steer away from any other agent who comes withing a
-    /// critical distance.  Ideally this should be replaced with a call
-    /// to steerForSeparation.
+    ///     Does a hard steer away from any other agent who comes withing a
+    ///     critical distance.  Ideally this should be replaced with a call
+    ///     to steerForSeparation.
     /// </remarks>
     /// <typeparam name="TVehicle"></typeparam>
     /// <param name="vehicle"></param>
@@ -240,7 +257,8 @@ public static class VehicleHelpers
     /// <param name="others"></param>
     /// <param name="annotation"></param>
     /// <returns></returns>
-    public static Vector3 SteerToAvoidCloseNeighbors<TVehicle>(this IVehicle vehicle, float minSeparationDistance, IEnumerable<TVehicle> others, IAnnotationService annotation = null)
+    public static Vector3 SteerToAvoidCloseNeighbors<TVehicle>(this IVehicle vehicle, float minSeparationDistance,
+        IEnumerable<TVehicle> others, IAnnotationService annotation = null)
         where TVehicle : IVehicle
     {
         // for each of the other vehicles...
@@ -248,10 +266,10 @@ public static class VehicleHelpers
         {
             if (other != vehicle)
             {
-                float sumOfRadii = vehicle.Radius + other.Radius;
-                float minCenterToCenter = minSeparationDistance + sumOfRadii;
-                Vector3 offset = other.Position - vehicle.Position;
-                float currentDistance = offset.Length();
+                var sumOfRadii = vehicle.Radius + other.Radius;
+                var minCenterToCenter = minSeparationDistance + sumOfRadii;
+                var offset = other.Position - vehicle.Position;
+                var currentDistance = offset.Length();
 
                 if (currentDistance < minCenterToCenter)
                 {
@@ -267,14 +285,16 @@ public static class VehicleHelpers
         return Vector3.Zero;
     }
 
-    public static Vector3 SteerForAlignment(this IVehicle vehicle, float maxDistance, float cosMaxAngle, IEnumerable<IVehicle> flock, IAnnotationService annotation = null)
+    public static Vector3 SteerForAlignment(this IVehicle vehicle, float maxDistance, float cosMaxAngle,
+        IEnumerable<IVehicle> flock, IAnnotationService annotation = null)
     {
         // steering accumulator and count of neighbors, both initially zero
-        Vector3 steering = Vector3.Zero;
-        int neighbors = 0;
+        var steering = Vector3.Zero;
+        var neighbors = 0;
 
         // for each of the other vehicles...
-        foreach (IVehicle other in flock.Where(other => vehicle.IsInBoidNeighborhood(other, vehicle.Radius * 3, maxDistance, cosMaxAngle)))
+        foreach (var other in flock.Where(other =>
+                     vehicle.IsInBoidNeighborhood(other, vehicle.Radius * 3, maxDistance, cosMaxAngle)))
         {
             // accumulate sum of neighbor's heading
             steering += other.Forward;
@@ -287,7 +307,7 @@ public static class VehicleHelpers
         // correcting direction, then normalize to pure direction
         if (neighbors > 0)
         {
-            steering = ((steering / neighbors) - vehicle.Forward);
+            steering = (steering / neighbors) - vehicle.Forward;
 
             var length = steering.Length();
             if (length > 0.025f)
@@ -297,14 +317,16 @@ public static class VehicleHelpers
         return steering;
     }
 
-    public static Vector3 SteerForCohesion(this IVehicle vehicle, float maxDistance, float cosMaxAngle, IEnumerable<IVehicle> flock, IAnnotationService annotation = null)
+    public static Vector3 SteerForCohesion(this IVehicle vehicle, float maxDistance, float cosMaxAngle,
+        IEnumerable<IVehicle> flock, IAnnotationService annotation = null)
     {
         // steering accumulator and count of neighbors, both initially zero
-        Vector3 steering = Vector3.Zero;
-        int neighbors = 0;
+        var steering = Vector3.Zero;
+        var neighbors = 0;
 
         // for each of the other vehicles...
-        foreach (IVehicle other in flock.Where(other => vehicle.IsInBoidNeighborhood(other, vehicle.Radius * 3, maxDistance, cosMaxAngle)))
+        foreach (var other in flock.Where(other =>
+                     vehicle.IsInBoidNeighborhood(other, vehicle.Radius * 3, maxDistance, cosMaxAngle)))
         {
             // accumulate sum of neighbor's positions
             steering += other.Position;
@@ -323,45 +345,39 @@ public static class VehicleHelpers
         return steering;
     }
 
-    readonly static float[,] pursuitFactors = new float[3, 3]
-    {
-        { 2, 2, 0.5f },         //Behind
-        { 4, 0.8f, 1 },         //Aside
-        { 0.85f, 1.8f, 4 },     //Ahead
-    };
-
-    public static Vector3 SteerForPursuit(this IVehicle vehicle, IVehicle quarry, float maxPredictionTime, float maxSpeed, IAnnotationService annotation = null)
+    public static Vector3 SteerForPursuit(this IVehicle vehicle, IVehicle quarry, float maxPredictionTime,
+        float maxSpeed, IAnnotationService annotation = null)
     {
         // offset from this to quarry, that distance, unit vector toward quarry
-        Vector3 offset = quarry.Position - vehicle.Position;
-        float distance = offset.Length();
-        Vector3 unitOffset = offset / distance;
+        var offset = quarry.Position - vehicle.Position;
+        var distance = offset.Length();
+        var unitOffset = offset / distance;
 
         // how parallel are the paths of "this" and the quarry
         // (1 means parallel, 0 is pependicular, -1 is anti-parallel)
-        float parallelness = Vector3.Dot(vehicle.Forward, quarry.Forward);
+        var parallelness = Vector3.Dot(vehicle.Forward, quarry.Forward);
 
         // how "forward" is the direction to the quarry
         // (1 means dead ahead, 0 is directly to the side, -1 is straight back)
-        float forwardness = Vector3.Dot(vehicle.Forward, unitOffset);
+        var forwardness = Vector3.Dot(vehicle.Forward, unitOffset);
 
-        float directTravelTime = distance / Math.Max(0.001f, vehicle.Speed);
-        int f = Utilities.IntervalComparison(forwardness, -0.707f, 0.707f);
-        int p = Utilities.IntervalComparison(parallelness, -0.707f, 0.707f);
+        var directTravelTime = distance / Math.Max(0.001f, vehicle.Speed);
+        var f = Utilities.IntervalComparison(forwardness, -0.707f, 0.707f);
+        var p = Utilities.IntervalComparison(parallelness, -0.707f, 0.707f);
 
         // Break the pursuit into nine cases, the cross product of the
         // quarry being [ahead, aside, or behind] us and heading
         // [parallel, perpendicular, or anti-parallel] to us.
-        float timeFactor = pursuitFactors[f + 1, p + 1];
+        var timeFactor = pursuitFactors[f + 1, p + 1];
 
         // estimated time until intercept of quarry
-        float et = directTravelTime * timeFactor;
+        var et = directTravelTime * timeFactor;
 
         // xxx experiment, if kept, this limit should be an argument
-        float etl = (et > maxPredictionTime) ? maxPredictionTime : et;
+        var etl = et > maxPredictionTime ? maxPredictionTime : et;
 
         // estimated position of quarry at intercept
-        Vector3 target = quarry.PredictFuturePosition(etl);
+        var target = quarry.PredictFuturePosition(etl);
 
         // annotation
         if (annotation != null)
@@ -370,52 +386,55 @@ public static class VehicleHelpers
         return SteerForSeek(vehicle, target, maxSpeed, annotation);
     }
 
-    public static Vector3 SteerForEvasion(this IVehicle vehicle, IVehicle menace, float maxPredictionTime, float maxSpeed, IAnnotationService annotation = null)
+    public static Vector3 SteerForEvasion(this IVehicle vehicle, IVehicle menace, float maxPredictionTime,
+        float maxSpeed, IAnnotationService annotation = null)
     {
         // offset from this to menace, that distance, unit vector toward menace
-        Vector3 offset = menace.Position - vehicle.Position;
-        float distance = offset.Length();
+        var offset = menace.Position - vehicle.Position;
+        var distance = offset.Length();
 
-        float roughTime = distance / menace.Speed;
-        float predictionTime = ((roughTime > maxPredictionTime) ? maxPredictionTime : roughTime);
+        var roughTime = distance / menace.Speed;
+        var predictionTime = roughTime > maxPredictionTime ? maxPredictionTime : roughTime;
 
-        Vector3 target = menace.PredictFuturePosition(predictionTime);
+        var target = menace.PredictFuturePosition(predictionTime);
 
         return SteerForFlee(vehicle, target, maxSpeed, annotation);
     }
 
     /// <summary>
-    /// tries to maintain a given speed, returns a maxForce-clipped steering
-    /// force along the forward/backward axis
+    ///     tries to maintain a given speed, returns a maxForce-clipped steering
+    ///     force along the forward/backward axis
     /// </summary>
     /// <param name="vehicle"></param>
     /// <param name="targetSpeed"></param>
     /// <param name="maxForce"></param>
     /// <param name="annotation"></param>
     /// <returns></returns>
-    public static Vector3 SteerForTargetSpeed(this IVehicle vehicle, float targetSpeed, float maxForce, IAnnotationService annotation = null)
+    public static Vector3 SteerForTargetSpeed(this IVehicle vehicle, float targetSpeed, float maxForce,
+        IAnnotationService annotation = null)
     {
-        float mf = maxForce;
-        float speedError = targetSpeed - vehicle.Speed;
+        var mf = maxForce;
+        var speedError = targetSpeed - vehicle.Speed;
         return vehicle.Forward * Utilities.Clamp(speedError, -mf, +mf);
     }
 
     /// <summary>
-    /// Unaligned collision avoidance behavior: avoid colliding with other
-    /// nearby vehicles moving in unconstrained directions.  Determine which
-    /// (if any) other other this we would collide with first, then steers
-    /// to avoid the site of that potential collision.  Returns a steering
-    /// force vector, which is zero length if there is no impending collision.
+    ///     Unaligned collision avoidance behavior: avoid colliding with other
+    ///     nearby vehicles moving in unconstrained directions.  Determine which
+    ///     (if any) other other this we would collide with first, then steers
+    ///     to avoid the site of that potential collision.  Returns a steering
+    ///     force vector, which is zero length if there is no impending collision.
     /// </summary>
     /// <param name="vehicle"></param>
     /// <param name="minTimeToCollision"></param>
     /// <param name="others"></param>
     /// <param name="annotation"></param>
     /// <returns></returns>
-    public static Vector3 SteerToAvoidNeighbors(this IVehicle vehicle, float minTimeToCollision, IEnumerable<IVehicle> others, IAnnotationService annotation = null)
+    public static Vector3 SteerToAvoidNeighbors(this IVehicle vehicle, float minTimeToCollision,
+        IEnumerable<IVehicle> others, IAnnotationService annotation = null)
     {
         // first priority is to prevent immediate interpenetration
-        Vector3 separation = SteerToAvoidCloseNeighbors(vehicle, 0, others, annotation);
+        var separation = SteerToAvoidCloseNeighbors(vehicle, 0, others, annotation);
         if (separation != Vector3.Zero)
             return separation;
 
@@ -426,27 +445,27 @@ public static class VehicleHelpers
         // Time (in seconds) until the most immediate collision threat found
         // so far.  Initial value is a threshold: don't look more than this
         // many frames into the future.
-        float minTime = minTimeToCollision;
+        var minTime = minTimeToCollision;
 
         // xxx solely for annotation
-        Vector3 xxxThreatPositionAtNearestApproach = Vector3.Zero;
-        Vector3 xxxOurPositionAtNearestApproach = Vector3.Zero;
+        var xxxThreatPositionAtNearestApproach = Vector3.Zero;
+        var xxxOurPositionAtNearestApproach = Vector3.Zero;
 
         // for each of the other vehicles, determine which (if any)
         // pose the most immediate threat of collision.
-        foreach (IVehicle other in others)
+        foreach (var other in others)
         {
             if (other != vehicle)
             {
                 // avoid when future positions are this close (or less)
-                float collisionDangerThreshold = vehicle.Radius * 2;
+                var collisionDangerThreshold = vehicle.Radius * 2;
 
                 // predicted time until nearest approach of "this" and "other"
-                float time = PredictNearestApproachTime(vehicle, other);
+                var time = PredictNearestApproachTime(vehicle, other);
 
                 // If the time is in the future, sooner than any other
                 // threatened collision...
-                if ((time >= 0) && (time < minTime))
+                if (time >= 0 && time < minTime)
                 {
                     // if the two will be close enough to collide,
                     // make a note of it
@@ -463,25 +482,25 @@ public static class VehicleHelpers
         if (threat != null)
         {
             // parallel: +1, perpendicular: 0, anti-parallel: -1
-            float parallelness = Vector3.Dot(vehicle.Forward, threat.Forward);
+            var parallelness = Vector3.Dot(vehicle.Forward, threat.Forward);
             const float angle = 0.707f;
 
             if (parallelness < -angle)
             {
                 // anti-parallel "head on" paths:
                 // steer away from future threat position
-                Vector3 offset = xxxThreatPositionAtNearestApproach - vehicle.Position;
-                float sideDot = Vector3.Dot(offset, vehicle.Side);
-                steer = (sideDot > 0) ? -1.0f : 1.0f;
+                var offset = xxxThreatPositionAtNearestApproach - vehicle.Position;
+                var sideDot = Vector3.Dot(offset, vehicle.Side);
+                steer = sideDot > 0 ? -1.0f : 1.0f;
             }
             else
             {
                 if (parallelness > angle)
                 {
                     // parallel paths: steer away from threat
-                    Vector3 offset = threat.Position - vehicle.Position;
-                    float sideDot = Vector3.Dot(offset, vehicle.Side);
-                    steer = (sideDot > 0) ? -1.0f : 1.0f;
+                    var offset = threat.Position - vehicle.Position;
+                    var sideDot = Vector3.Dot(offset, vehicle.Side);
+                    steer = sideDot > 0 ? -1.0f : 1.0f;
                 }
                 else
                 {
@@ -489,22 +508,23 @@ public static class VehicleHelpers
                     // (only the slower of the two does this)
                     if (threat.Speed <= vehicle.Speed)
                     {
-                        float sideDot = Vector3.Dot(vehicle.Side, threat.Velocity);
-                        steer = (sideDot > 0) ? -1.0f : 1.0f;
+                        var sideDot = Vector3.Dot(vehicle.Side, threat.Velocity);
+                        steer = sideDot > 0 ? -1.0f : 1.0f;
                     }
                 }
             }
 
             if (annotation != null)
-                annotation.AvoidNeighbor(threat, steer, xxxOurPositionAtNearestApproach, xxxThreatPositionAtNearestApproach);
+                annotation.AvoidNeighbor(threat, steer, xxxOurPositionAtNearestApproach,
+                    xxxThreatPositionAtNearestApproach);
         }
 
         return vehicle.Side * steer;
     }
 
     /// <summary>
-    /// Given two vehicles, based on their current positions and velocities,
-    /// determine the time until nearest approach
+    ///     Given two vehicles, based on their current positions and velocities,
+    ///     determine the time until nearest approach
     /// </summary>
     /// <param name="vehicle"></param>
     /// <param name="other"></param>
@@ -513,10 +533,10 @@ public static class VehicleHelpers
     {
         // imagine we are at the origin with no velocity,
         // compute the relative velocity of the other this
-        Vector3 myVelocity = vehicle.Velocity;
-        Vector3 otherVelocity = other.Velocity;
-        Vector3 relVelocity = otherVelocity - myVelocity;
-        float relSpeed = relVelocity.Length();
+        var myVelocity = vehicle.Velocity;
+        var otherVelocity = other.Velocity;
+        var relVelocity = otherVelocity - myVelocity;
+        var relSpeed = relVelocity.Length();
 
         // for parallel paths, the vehicles will always be at the same distance,
         // so return 0 (aka "now") since "there is no time like the present"
@@ -529,20 +549,20 @@ public static class VehicleHelpers
         // the nearest approach.
 
         // Take the unit tangent along the other this's path
-        Vector3 relTangent = relVelocity / relSpeed;
+        var relTangent = relVelocity / relSpeed;
 
         // find distance from its path to origin (compute offset from
         // other to us, find length of projection onto path)
-        Vector3 relPosition = vehicle.Position - other.Position;
-        float projection = Vector3.Dot(relTangent, relPosition);
+        var relPosition = vehicle.Position - other.Position;
+        var projection = Vector3.Dot(relTangent, relPosition);
 
         return projection / relSpeed;
     }
 
     /// <summary>
-    /// Given the time until nearest approach (predictNearestApproachTime)
-    /// determine position of each this at that time, and the distance
-    /// between them
+    ///     Given the time until nearest approach (predictNearestApproachTime)
+    ///     determine position of each this at that time, and the distance
+    ///     between them
     /// </summary>
     /// <param name="vehicle"></param>
     /// <param name="other"></param>
@@ -550,53 +570,60 @@ public static class VehicleHelpers
     /// <returns></returns>
     static float ComputeNearestApproachPositions(IVehicle vehicle, IVehicle other, float time)
     {
-        Vector3 myTravel = vehicle.Forward * vehicle.Speed * time;
-        Vector3 otherTravel = other.Forward * other.Speed * time;
+        var myTravel = vehicle.Forward * vehicle.Speed * time;
+        var otherTravel = other.Forward * other.Speed * time;
 
-        Vector3 myFinal = vehicle.Position + myTravel;
-        Vector3 otherFinal = other.Position + otherTravel;
+        var myFinal = vehicle.Position + myTravel;
+        var otherFinal = other.Position + otherTravel;
 
         return Vector3.Distance(myFinal, otherFinal);
     }
 
     public static bool IsAhead(this IVehicle vehicle, Vector3 target, float cosThreshold = 0.707f)
     {
-        Vector3 targetDirection = Vector3.Normalize(target - vehicle.Position);
+        var targetDirection = Vector3.Normalize(target - vehicle.Position);
         return Vector3.Dot(vehicle.Forward, targetDirection) > cosThreshold;
     }
 
     public static bool IsAside(this IVehicle vehicle, Vector3 target, float cosThreshold = 0.707f)
     {
-        Vector3 targetDirection = Vector3.Normalize(target - vehicle.Position);
-        float dp = Vector3.Dot(vehicle.Forward, targetDirection);
-        return (dp < cosThreshold) && (dp > -cosThreshold);
+        var targetDirection = Vector3.Normalize(target - vehicle.Position);
+        var dp = Vector3.Dot(vehicle.Forward, targetDirection);
+        return dp < cosThreshold && dp > -cosThreshold;
     }
 
     public static bool IsBehind(this IVehicle vehicle, Vector3 target, float cosThreshold = -0.707f)
     {
-        Vector3 targetDirection = Vector3.Normalize(target - vehicle.Position);
+        var targetDirection = Vector3.Normalize(target - vehicle.Position);
         return Vector3.Dot(vehicle.Forward, targetDirection) < cosThreshold;
     }
 
-    static bool IsInBoidNeighborhood(this ILocalSpaceBasis vehicle, ILocalSpaceBasis other, float minDistance, float maxDistance, float cosMaxAngle)
+    static bool IsInBoidNeighborhood(this ILocalSpaceBasis vehicle, ILocalSpaceBasis other, float minDistance,
+        float maxDistance, float cosMaxAngle)
     {
         if (other == vehicle)
             return false;
 
-        Vector3 offset = other.Position - vehicle.Position;
-        float distanceSquared = offset.LengthSquared();
+        var offset = other.Position - vehicle.Position;
+        var distanceSquared = offset.LengthSquared();
 
         // definitely in neighborhood if inside minDistance sphere
-        if (distanceSquared < (minDistance * minDistance))
+        if (distanceSquared < minDistance * minDistance)
             return true;
 
         // definitely not in neighborhood if outside maxDistance sphere
-        if (distanceSquared > (maxDistance * maxDistance))
+        if (distanceSquared > maxDistance * maxDistance)
             return false;
 
         // otherwise, test angular offset from forward axis
-        Vector3 unitOffset = offset / (float)Math.Sqrt(distanceSquared);
-        float forwardness = Vector3.Dot(vehicle.Forward, unitOffset);
+        var unitOffset = offset / (float)Math.Sqrt(distanceSquared);
+        var forwardness = Vector3.Dot(vehicle.Forward, unitOffset);
         return forwardness > cosMaxAngle;
+    }
+
+    struct PathIntersection
+    {
+        public float Distance;
+        public IObstacle Obstacle;
     }
 }

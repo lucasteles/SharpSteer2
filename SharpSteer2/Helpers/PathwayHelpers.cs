@@ -5,7 +5,7 @@ namespace SharpSteer2.Helpers;
 public static class PathwayHelpers
 {
     /// <summary>
-    /// is the given point inside the path tube?
+    ///     is the given point inside the path tube?
     /// </summary>
     /// <param name="pathway"></param>
     /// <param name="point"></param>
@@ -19,7 +19,7 @@ public static class PathwayHelpers
     }
 
     /// <summary>
-    /// how far outside path tube is the given point?  (negative is inside)
+    ///     how far outside path tube is the given point?  (negative is inside)
     /// </summary>
     /// <param name="pathway"></param>
     /// <param name="point"></param>

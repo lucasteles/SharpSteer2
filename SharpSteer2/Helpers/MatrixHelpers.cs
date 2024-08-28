@@ -18,7 +18,7 @@ public static class MatrixHelpers
         {
             X = m.M11,
             Y = m.M12,
-            Z = m.M13
+            Z = m.M13,
         };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -35,7 +35,7 @@ public static class MatrixHelpers
         {
             X = m.M21,
             Y = m.M22,
-            Z = m.M23
+            Z = m.M23,
         };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -52,6 +52,6 @@ public static class MatrixHelpers
         {
             X = m.M31,
             Y = m.M32,
-            Z = m.M33
+            Z = m.M33,
         };
 }

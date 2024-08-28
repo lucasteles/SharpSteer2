@@ -11,55 +11,29 @@
 namespace SharpSteer2.Database;
 
 /// <summary>
-/// This structure represents the spatial database.  Typically one of
-/// these would be created, by a call to lqCreateDatabase, for a given
-/// application.
+///     This structure represents the spatial database.  Typically one of
+///     these would be created, by a call to lqCreateDatabase, for a given
+///     application.
 /// </summary>
 class LocalityQueryDatabase
 {
     // type for a pointer to a function used to map over client objects
     public delegate void LQCallBackFunction(object clientObject, float distanceSquared, object clientQueryState);
 
-    /// <summary>
-    /// This structure is a proxy for (and contains a pointer to) a client
-    /// (application) obj in the spatial database.  One of these exists
-    /// for each client obj.  This might be included within the
-    /// structure of a client obj, or could be allocated separately.
-    /// </summary>
-    public class ClientProxy(object obj)
-    {
-        // previous obj in this bin, or null
-        public ClientProxy Prev;
-
-        // next obj in this bin, or null
-        public ClientProxy Next;
-
-        // bin ID (pointer-to-pointer to bin contents list)
-        //public ClientProxy bin;
-        // bin ID (index into bin contents list)
-        public int? Bin;
-
-        // pointer to client obj
-        public readonly object Obj = obj;
-
-        // the obj's location ("key point") used for spatial sorting
-        public Vector3 Position;
-    }
-
-    // the origin is the super-brick corner minimum coordinates
-    readonly Vector3 origin;
-
-    // length of the edges of the super-brick
-    readonly Vector3 size;
+    // pointer to an array of pointers, one for each bin
+    // The last index is the extra bin for "everything else" (points outside super-brick)
+    readonly ClientProxy[] bins;
 
     // number of sub-brick divisions in each direction
     readonly int divX;
     readonly int divY;
     readonly int divZ;
 
-    // pointer to an array of pointers, one for each bin
-    // The last index is the extra bin for "everything else" (points outside super-brick)
-    readonly ClientProxy[] bins;
+    // the origin is the super-brick corner minimum coordinates
+    readonly Vector3 origin;
+
+    // length of the edges of the super-brick
+    readonly Vector3 size;
 
     // extra bin for "everything else" (points outside super-brick)
     //ClientProxy other;
@@ -84,9 +58,9 @@ class LocalityQueryDatabase
         divZ = divz;
 
         // The last index is the "other" bin
-        int binCount = divx * divy * divz + 1;
+        var binCount = (divx * divy * divz) + 1;
         bins = new ClientProxy[binCount];
-        for (int i = 0; i < bins.Length; i++)
+        for (var i = 0; i < bins.Length; i++)
         {
             bins[i] = null;
         }
@@ -94,7 +68,7 @@ class LocalityQueryDatabase
 
     /* Determine index into linear bin array given 3D bin indices */
 
-    int BinCoordsToBinIndex(int ix, int iy, int iz) => ((ix * divY * divZ) + (iy * divZ) + iz);
+    int BinCoordsToBinIndex(int ix, int iy, int iz) => (ix * divY * divZ) + (iy * divZ) + iz;
 
     /* Call for each client obj every time its location changes.  For
        example, in an animation application, this would be called each
@@ -102,7 +76,7 @@ class LocalityQueryDatabase
     public void UpdateForNewLocation(ClientProxy obj, Vector3 position)
     {
         /* find bin for new location */
-        int newBin = BinForLocation(position);
+        var newBin = BinForLocation(position);
 
         /* store location in client obj, for future reference */
         obj.Position = position;
@@ -143,7 +117,8 @@ class LocalityQueryDatabase
        terms of its XYZ coordinates.  The bin ID is a pointer to a pointer
        to the bin contents list.  */
 
-    /*lqClientProxy*/ int BinForLocation(Vector3 position)
+    /*lqClientProxy*/
+    int BinForLocation(Vector3 position)
     {
         /* if point outside super-brick, return the "other" bin */
         if (position.X < origin.X || position.Y < origin.Y || position.Z < origin.Z ||
@@ -153,12 +128,12 @@ class LocalityQueryDatabase
         }
 
         /* if point inside super-brick, compute the bin coordinates */
-        int ix = (int)(((position.X - origin.X) / size.X) * divX);
-        int iy = (int)(((position.Y - origin.Y) / size.Y) * divY);
-        int iz = (int)(((position.Z - origin.Z) / size.Z) * divZ);
+        var ix = (int)((position.X - origin.X) / size.X * divX);
+        var iy = (int)((position.Y - origin.Y) / size.Y * divY);
+        var iz = (int)((position.Z - origin.Z) / size.Z * divZ);
 
         /* convert to linear bin number */
-        int i = BinCoordsToBinIndex(ix, iy, iz);
+        var i = BinCoordsToBinIndex(ix, iy, iz);
 
         /* return pointer to that bin */
         return i; // (bins[i]);
@@ -184,14 +159,14 @@ class LocalityQueryDatabase
     public void MapOverAllObjectsInLocality(Vector3 center, float radius, LQCallBackFunction func,
         object clientQueryState)
     {
-        int partlyOut = 0;
-        bool completelyOutside =
-            (((center.X + radius) < origin.X) ||
-             ((center.Y + radius) < origin.Y) ||
-             ((center.Z + radius) < origin.Z) ||
-             ((center.X - radius) >= origin.X + size.X) ||
-             ((center.Y - radius) >= origin.Y + size.Y) ||
-             ((center.Z - radius) >= origin.Z + size.Z));
+        var partlyOut = 0;
+        var completelyOutside =
+            center.X + radius < origin.X ||
+            center.Y + radius < origin.Y ||
+            center.Z + radius < origin.Z ||
+            center.X - radius >= origin.X + size.X ||
+            center.Y - radius >= origin.Y + size.Y ||
+            center.Z - radius >= origin.Z + size.Z;
 
         /* is the sphere completely outside the "super brick"? */
         if (completelyOutside)
@@ -201,12 +176,12 @@ class LocalityQueryDatabase
         }
 
         /* compute min and max bin coordinates for each dimension */
-        int minBinX = (int)((((center.X - radius) - origin.X) / size.X) * divX);
-        int minBinY = (int)((((center.Y - radius) - origin.Y) / size.Y) * divY);
-        int minBinZ = (int)((((center.Z - radius) - origin.Z) / size.Z) * divZ);
-        int maxBinX = (int)((((center.X + radius) - origin.X) / size.X) * divX);
-        int maxBinY = (int)((((center.Y + radius) - origin.Y) / size.Y) * divY);
-        int maxBinZ = (int)((((center.Z + radius) - origin.Z) / size.Z) * divZ);
+        var minBinX = (int)((center.X - radius - origin.X) / size.X * divX);
+        var minBinY = (int)((center.Y - radius - origin.Y) / size.Y * divY);
+        var minBinZ = (int)((center.Z - radius - origin.Z) / size.Z * divZ);
+        var maxBinX = (int)((center.X + radius - origin.X) / size.X * divX);
+        var maxBinY = (int)((center.Y + radius - origin.Y) / size.Y * divY);
+        var maxBinZ = (int)((center.Z + radius - origin.Z) / size.Z * divZ);
 
         /* clip bin coordinates */
         if (minBinX < 0)
@@ -259,9 +234,9 @@ class LocalityQueryDatabase
     }
 
     /// <summary>
-    /// Given a bin's list of client proxies, traverse the list and invoke
-    /// the given lqCallBackFunction on each obj that falls within the
-    /// search radius.
+    ///     Given a bin's list of client proxies, traverse the list and invoke
+    ///     the given lqCallBackFunction on each obj that falls within the
+    ///     search radius.
     /// </summary>
     /// <param name="co"></param>
     /// <param name="radiusSquared"></param>
@@ -275,8 +250,8 @@ class LocalityQueryDatabase
         {
             // compute distance (squared) from this client obj to given
             // locality sphere's centerpoint
-            Vector3 d = position - co.Position;
-            float distanceSquared = d.LengthSquared();
+            var d = position - co.Position;
+            var distanceSquared = d.LengthSquared();
 
             // apply function if client obj within sphere
             if (distanceSquared < radiusSquared)
@@ -288,9 +263,9 @@ class LocalityQueryDatabase
     }
 
     /// <summary>
-    /// This subroutine of lqMapOverAllObjectsInLocality efficiently
-    /// traverses of subset of bins specified by max and min bin
-    /// coordinates.
+    ///     This subroutine of lqMapOverAllObjectsInLocality efficiently
+    ///     traverses of subset of bins specified by max and min bin
+    ///     coordinates.
     /// </summary>
     /// <param name="center"></param>
     /// <param name="radius"></param>
@@ -309,30 +284,30 @@ class LocalityQueryDatabase
         int maxBinX, int maxBinY, int maxBinZ)
     {
         int i;
-        int slab = divY * divZ;
-        int row = divZ;
-        int istart = minBinX * slab;
-        int jstart = minBinY * row;
-        int kstart = minBinZ;
-        float radiusSquared = radius * radius;
+        var slab = divY * divZ;
+        var row = divZ;
+        var istart = minBinX * slab;
+        var jstart = minBinY * row;
+        var kstart = minBinZ;
+        var radiusSquared = radius * radius;
 
         /* loop for x bins across diameter of sphere */
-        int iindex = istart;
+        var iindex = istart;
         for (i = minBinX; i <= maxBinX; i++)
         {
             /* loop for y bins across diameter of sphere */
-            int jindex = jstart;
+            var jindex = jstart;
             int j;
             for (j = minBinY; j <= maxBinY; j++)
             {
                 /* loop for z bins across diameter of sphere */
-                int kindex = kstart;
+                var kindex = kstart;
                 int k;
                 for (k = minBinZ; k <= maxBinZ; k++)
                 {
                     /* get current bin's client obj list */
-                    ClientProxy bin = bins[iindex + jindex + kindex];
-                    ClientProxy co = bin;
+                    var bin = bins[iindex + jindex + kindex];
+                    var co = bin;
 
                     /* traverse current bin's client obj list */
                     TraverseBinClientObjectList(co,
@@ -351,9 +326,9 @@ class LocalityQueryDatabase
     }
 
     /// <summary>
-    /// If the query region (sphere) extends outside of the "super-brick"
-    /// we need to check for objects in the catch-all "other" bin which
-    /// holds any object which are not inside the regular sub-bricks
+    ///     If the query region (sphere) extends outside of the "super-brick"
+    ///     we need to check for objects in the catch-all "other" bin which
+    ///     holds any object which are not inside the regular sub-bricks
     /// </summary>
     /// <param name="center"></param>
     /// <param name="radius"></param>
@@ -362,8 +337,8 @@ class LocalityQueryDatabase
     void MapOverAllOutsideObjects(Vector3 center, float radius, LQCallBackFunction func,
         object clientQueryState)
     {
-        ClientProxy co = bins[bins.Length - 1];
-        float radiusSquared = radius * radius;
+        var co = bins[bins.Length - 1];
+        var radiusSquared = radius * radius;
 
         // traverse the "other" bin's client object list
         TraverseBinClientObjectList(co, radiusSquared, func, clientQueryState, center);
@@ -384,7 +359,7 @@ class LocalityQueryDatabase
        regardless of locality (cf lqMapOverAllObjectsInLocality) */
     public void MapOverAllObjects(LQCallBackFunction func, object clientQueryState)
     {
-        foreach (ClientProxy bin in bins)
+        foreach (var bin in bins)
         {
             MapOverAllObjectsInBin(bin, func, clientQueryState);
         }
@@ -417,5 +392,31 @@ class LocalityQueryDatabase
         obj.Prev = null;
         obj.Next = null;
         obj.Bin = null;
+    }
+
+    /// <summary>
+    ///     This structure is a proxy for (and contains a pointer to) a client
+    ///     (application) obj in the spatial database.  One of these exists
+    ///     for each client obj.  This might be included within the
+    ///     structure of a client obj, or could be allocated separately.
+    /// </summary>
+    public class ClientProxy(object obj)
+    {
+        // pointer to client obj
+        public readonly object Obj = obj;
+
+        // bin ID (pointer-to-pointer to bin contents list)
+        //public ClientProxy bin;
+        // bin ID (index into bin contents list)
+        public int? Bin;
+
+        // next obj in this bin, or null
+        public ClientProxy Next;
+
+        // the obj's location ("key point") used for spatial sorting
+        public Vector3 Position;
+
+        // previous obj in this bin, or null
+        public ClientProxy Prev;
     }
 }
