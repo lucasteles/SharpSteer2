@@ -13,10 +13,13 @@
 
 #---------------------------------- Content ---------------------------------#
 
-#begin Fonts/SegoeUiMono.spritefont
+#begin Fonts/inter.ttf
+/copy:Fonts/inter.ttf
+
+#begin Fonts/main.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Compressed
-/build:Fonts/SegoeUiMono.spritefont;Fonts/main.spritefont
+/build:Fonts/main.spritefont
 
