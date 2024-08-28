@@ -46,7 +46,7 @@ jobs:
                 run: dotnet pack SharpSteer2/ --configuration Release --include-symbols -p:Version='${{ steps.gitversion.outputs.SemVer }}' --output ./build_artifacts
 
             -   name: Upload lib NuGet package artifact to GitHub
-                uses: actions/upload-artifact@v3
+                uses: actions/upload-artifact@v4
                 with:
                     name: buildArtifacts
                     path: ./build_artifacts
@@ -58,14 +58,14 @@ jobs:
         needs: build
         steps:
             -   name: Download lib nuget package artifact
-                uses: actions/download-artifact@v3
+                uses: actions/download-artifact@v4
                 with:
                     name: buildArtifacts
                     path: ./build_artifacts
 
             -   name: Push package to Nuget
                 run: |
-                    dotnet nuget push libPackage/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+                    dotnet nuget push build_artifacts/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
 
             -   name: Create Release
                 uses: ncipollo/release-action@v1
