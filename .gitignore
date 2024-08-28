@@ -17,3 +17,4 @@ SharpSteer2.WinDemoContent/obj
 SharpSteer2.Tests/bin
 SharpSteer2.Tests/obj
 _Resharper.*
+.vscode/

@@ -1,53 +1,28 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpSteer2.Tests", "SharpSteer2.Tests\SharpSteer2.Tests.csproj", "{A7952769-CC98-43B4-99D5-E172417F4453}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpSteer2", "SharpSteer2\SharpSteer2.csproj", "{52CB25BD-0C96-45A2-A22C-6F361D37E077}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{274F6D7B-4D5A-419F-A0BD-5AFA2182B2C2}"
-	ProjectSection(SolutionItems) = preProject
-		Local.testsettings = Local.testsettings
-		SharpSteer2.vsmdi = SharpSteer2.vsmdi
-		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpSteer2", "SharpSteer2\SharpSteer2.csproj", "{724BCA39-40B0-4787-9604-985E30740FD6}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo", "Demo\Demo.csproj", "{DA0517F7-5AAE-475A-A549-02152DD20716}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo.ContentShim", "Demo.ContentShim\Demo.ContentShim.csproj", "{0001D035-FE3A-4334-9773-56D4D774A4F9}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpSteer2.WinDemoContent", "SharpSteer2.WinDemoContent\SharpSteer2.WinDemoContent.contentproj", "{5057B41F-613F-4C6B-A522-42B15B54F3EF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpSteer2.Tests", "SharpSteer2.Tests\SharpSteer2.Tests.csproj", "{663A5347-6887-4A29-A7E5-1DDF11ABD452}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A7952769-CC98-43B4-99D5-E172417F4453}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A7952769-CC98-43B4-99D5-E172417F4453}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A7952769-CC98-43B4-99D5-E172417F4453}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A7952769-CC98-43B4-99D5-E172417F4453}.Release|Any CPU.Build.0 = Release|Any CPU
-		{724BCA39-40B0-4787-9604-985E30740FD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{724BCA39-40B0-4787-9604-985E30740FD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{724BCA39-40B0-4787-9604-985E30740FD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{724BCA39-40B0-4787-9604-985E30740FD6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DA0517F7-5AAE-475A-A549-02152DD20716}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{DA0517F7-5AAE-475A-A549-02152DD20716}.Debug|Any CPU.Build.0 = Debug|x86
-		{DA0517F7-5AAE-475A-A549-02152DD20716}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DA0517F7-5AAE-475A-A549-02152DD20716}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0001D035-FE3A-4334-9773-56D4D774A4F9}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{0001D035-FE3A-4334-9773-56D4D774A4F9}.Debug|Any CPU.Build.0 = Debug|x86
-		{0001D035-FE3A-4334-9773-56D4D774A4F9}.Release|Any CPU.ActiveCfg = Release|x86
-		{5057B41F-613F-4C6B-A522-42B15B54F3EF}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{5057B41F-613F-4C6B-A522-42B15B54F3EF}.Release|Any CPU.ActiveCfg = Release|x86
-	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(TestCaseManagementSettings) = postSolution
-		CategoryFile = SharpSteer2.vsmdi
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{52CB25BD-0C96-45A2-A22C-6F361D37E077}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52CB25BD-0C96-45A2-A22C-6F361D37E077}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52CB25BD-0C96-45A2-A22C-6F361D37E077}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52CB25BD-0C96-45A2-A22C-6F361D37E077}.Release|Any CPU.Build.0 = Release|Any CPU
+		{663A5347-6887-4A29-A7E5-1DDF11ABD452}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{663A5347-6887-4A29-A7E5-1DDF11ABD452}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{663A5347-6887-4A29-A7E5-1DDF11ABD452}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{663A5347-6887-4A29-A7E5-1DDF11ABD452}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
