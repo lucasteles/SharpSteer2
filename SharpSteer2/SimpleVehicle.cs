@@ -8,279 +8,238 @@
 // you should have received as part of this distribution. The terms
 // are also available at http://www.codeplex.com/SharpSteer/Project/License.aspx.
 
-using System;
-using System.Numerics;
 using SharpSteer2.Helpers;
 
-namespace SharpSteer2
+namespace SharpSteer2;
+
+public class SimpleVehicle(IAnnotationService annotations = null) : SteerLibrary(annotations)
 {
-	public class SimpleVehicle : SteerLibrary
-	{
-	    Vector3 _lastForward;
-        Vector3 _lastPosition;
-		float _smoothedCurvature;
-		// The acceleration is smoothed
-        Vector3 _acceleration;
+    Vector3 lastForward;
+    Vector3 lastPosition;
+    float smoothedCurvature;
+    // The acceleration is smoothed
+    Vector3 acceleration;
 
-		public SimpleVehicle(IAnnotationService annotations = null)
-            : base(annotations)
-		{
-		}
+    // reset vehicle state
+    public override void Reset()
+    {
+        base.Reset();
 
-		// reset vehicle state
-		public override void Reset()
-		{
-            base.Reset();
+        // reset LocalSpace state
+        ResetLocalSpace();
 
-			// reset LocalSpace state
-			ResetLocalSpace();
+        Mass = 1;          // Mass (defaults to 1 so acceleration=force)
+        Speed = 0;         // speed along Forward direction.
 
-			Mass = 1;          // Mass (defaults to 1 so acceleration=force)
-			Speed = 0;         // speed along Forward direction.
+        Radius = 0.5f;     // size of bounding sphere
 
-			Radius = 0.5f;     // size of bounding sphere
+        // reset bookkeeping to do running averages of these quanities
+        ResetSmoothedPosition();
+        ResetSmoothedCurvature();
+        ResetAcceleration();
+    }
 
-			// reset bookkeeping to do running averages of these quanities
-			ResetSmoothedPosition();
-			ResetSmoothedCurvature();
-			ResetAcceleration();
-		}
+    // get/set Mass
+    // Mass (defaults to unity so acceleration=force)
+    public override float Mass { get; set; }
 
-		// get/set Mass
-        // Mass (defaults to unity so acceleration=force)
-	    public override float Mass { get; set; }
+    // get velocity of vehicle
+    public override Vector3 Velocity => Forward * Speed;
 
-	    // get velocity of vehicle
-        public override Vector3 Velocity
-		{
-			get { return Forward * Speed; }
-		}
+    // get/set speed of vehicle  (may be faster than taking mag of velocity)
+    // speed along Forward direction. Because local space is
+    // velocity-aligned, velocity = Forward * Speed
+    public override float Speed { get; set; }
 
-		// get/set speed of vehicle  (may be faster than taking mag of velocity)
-        // speed along Forward direction. Because local space is
-        // velocity-aligned, velocity = Forward * Speed
-	    public override float Speed { get; set; }
+    // size of bounding sphere, for obstacle avoidance, etc.
+    public override float Radius { get; set; }
 
-	    // size of bounding sphere, for obstacle avoidance, etc.
-	    public override float Radius { get; set; }
+    // get/set maxForce
+    // the maximum steering force this vehicle can apply
+    // (steering force is clipped to this magnitude)
+    public override float MaxForce => 0.1f;
 
-	    // get/set maxForce
-        // the maximum steering force this vehicle can apply
-        // (steering force is clipped to this magnitude)
-        public override float MaxForce
+    // get/set maxSpeed
+    // the maximum speed this vehicle is allowed to move
+    // (velocity is clipped to this magnitude)
+    public override float MaxSpeed => 1;
+
+    // apply a given steering force to our momentum,
+    // adjusting our orientation to maintain velocity-alignment.
+    public void ApplySteeringForce(Vector3 force, float elapsedTime)
+    {
+        Vector3 adjustedForce = AdjustRawSteeringForce(force, elapsedTime);
+
+        // enforce limit on magnitude of steering force
+        Vector3 clippedForce = adjustedForce.TruncateLength(MaxForce);
+
+        // compute acceleration and velocity
+        Vector3 newAcceleration = (clippedForce / Mass);
+        Vector3 newVelocity = Velocity;
+
+        // damp out abrupt changes and oscillations in steering acceleration
+        // (rate is proportional to time step, then clipped into useful range)
+        if (elapsedTime > 0)
         {
-            get { return 0.1f; }
+            float smoothRate = Utilities.Clamp(9 * elapsedTime, 0.15f, 0.4f);
+            Utilities.BlendIntoAccumulator(smoothRate, newAcceleration, ref acceleration);
         }
 
-	    // get/set maxSpeed
-        // the maximum speed this vehicle is allowed to move
-        // (velocity is clipped to this magnitude)
-	    public override float MaxSpeed
-	    {
-	        get { return 1; }
-	    }
+        // Euler integrate (per frame) acceleration into velocity
+        newVelocity += acceleration * elapsedTime;
 
-	    // apply a given steering force to our momentum,
-		// adjusting our orientation to maintain velocity-alignment.
-	    public void ApplySteeringForce(Vector3 force, float elapsedTime)
-		{
-			Vector3 adjustedForce = AdjustRawSteeringForce(force, elapsedTime);
+        // enforce speed limit
+        newVelocity = newVelocity.TruncateLength(MaxSpeed);
 
-			// enforce limit on magnitude of steering force
-            Vector3 clippedForce = adjustedForce.TruncateLength(MaxForce);
+        // update Speed
+        Speed = (newVelocity.Length());
 
-			// compute acceleration and velocity
-			Vector3 newAcceleration = (clippedForce / Mass);
-			Vector3 newVelocity = Velocity;
+        // Euler integrate (per frame) velocity into position
+        Position = (Position + (newVelocity * elapsedTime));
 
-			// damp out abrupt changes and oscillations in steering acceleration
-			// (rate is proportional to time step, then clipped into useful range)
-			if (elapsedTime > 0)
-			{
-                float smoothRate = Utilities.Clamp(9 * elapsedTime, 0.15f, 0.4f);
-				Utilities.BlendIntoAccumulator(smoothRate, newAcceleration, ref _acceleration);
-			}
+        // regenerate local space (by default: align vehicle's forward axis with
+        // new velocity, but this behavior may be overridden by derived classes.)
+        RegenerateLocalSpace(newVelocity, elapsedTime);
 
-			// Euler integrate (per frame) acceleration into velocity
-			newVelocity += _acceleration * elapsedTime;
+        // maintain path curvature information
+        MeasurePathCurvature(elapsedTime);
 
-			// enforce speed limit
-            newVelocity = newVelocity.TruncateLength(MaxSpeed);
+        // running average of recent positions
+        Utilities.BlendIntoAccumulator(elapsedTime * 0.06f, // QQQ
+            Position,
+            ref smoothedPosition);
+    }
 
-			// update Speed
-			Speed = (newVelocity.Length());
+    // the default version: keep FORWARD parallel to velocity, change
+    // UP as little as possible.
+    protected virtual void RegenerateLocalSpace(Vector3 newVelocity, float elapsedTime)
+    {
+        // adjust orthonormal basis vectors to be aligned with new velocity
+        if (Speed > 0)
+        {
+            RegenerateOrthonormalBasisUF(newVelocity / Speed);
+        }
+    }
 
-			// Euler integrate (per frame) velocity into position
-			Position = (Position + (newVelocity * elapsedTime));
+    // alternate version: keep FORWARD parallel to velocity, adjust UP
+    // according to a no-basis-in-reality "banking" behavior, something
+    // like what birds and airplanes do.  (XXX experimental cwr 6-5-03)
+    protected void RegenerateLocalSpaceForBanking(Vector3 newVelocity, float elapsedTime)
+    {
+        // the length of this global-upward-pointing vector controls the vehicle's
+        // tendency to right itself as it is rolled over from turning acceleration
+        Vector3 globalUp = new Vector3(0, 0.2f, 0);
 
-			// regenerate local space (by default: align vehicle's forward axis with
-			// new velocity, but this behavior may be overridden by derived classes.)
-			RegenerateLocalSpace(newVelocity, elapsedTime);
+        // acceleration points toward the center of local path curvature, the
+        // length determines how much the vehicle will roll while turning
+        Vector3 accelUp = acceleration * 0.05f;
 
-			// maintain path curvature information
-			MeasurePathCurvature(elapsedTime);
+        // combined banking, sum of UP due to turning and global UP
+        Vector3 bankUp = accelUp + globalUp;
 
-			// running average of recent positions
-			Utilities.BlendIntoAccumulator(elapsedTime * 0.06f, // QQQ
-								  Position,
-								  ref _smoothedPosition);
-		}
+        // blend bankUp into vehicle's UP basis vector
+        float smoothRate = elapsedTime * 3;
+        Vector3 tempUp = Up;
+        Utilities.BlendIntoAccumulator(smoothRate, bankUp, ref tempUp);
+        Up = Vector3.Normalize(tempUp);
 
-		// the default version: keep FORWARD parallel to velocity, change
-		// UP as little as possible.
-	    protected virtual void RegenerateLocalSpace(Vector3 newVelocity, float elapsedTime)
-		{
-			// adjust orthonormal basis vectors to be aligned with new velocity
-			if (Speed > 0)
-			{
-				RegenerateOrthonormalBasisUF(newVelocity / Speed);
-			}
-		}
+        Annotation.Line(Position, Position + (globalUp * 4), Colors.White);
+        Annotation.Line(Position, Position + (bankUp * 4), Colors.Orange);
+        Annotation.Line(Position, Position + (accelUp * 4), Colors.Red);
+        Annotation.Line(Position, Position + (Up * 1), Colors.Gold);
 
-		// alternate version: keep FORWARD parallel to velocity, adjust UP
-		// according to a no-basis-in-reality "banking" behavior, something
-		// like what birds and airplanes do.  (XXX experimental cwr 6-5-03)
-	    protected void RegenerateLocalSpaceForBanking(Vector3 newVelocity, float elapsedTime)
-		{
-			// the length of this global-upward-pointing vector controls the vehicle's
-			// tendency to right itself as it is rolled over from turning acceleration
-			Vector3 globalUp = new Vector3(0, 0.2f, 0);
+        // adjust orthonormal basis vectors to be aligned with new velocity
+        if (Speed > 0) RegenerateOrthonormalBasisUF(newVelocity / Speed);
+    }
 
-			// acceleration points toward the center of local path curvature, the
-			// length determines how much the vehicle will roll while turning
-			Vector3 accelUp = _acceleration * 0.05f;
+    /// <summary>
+    /// adjust the steering force passed to applySteeringForce.
+    /// allows a specific vehicle class to redefine this adjustment.
+    /// default is to disallow backward-facing steering at low speed.
+    /// </summary>
+    /// <param name="force"></param>
+    /// <param name="deltaTime"></param>
+    /// <returns></returns>
+    protected virtual Vector3 AdjustRawSteeringForce(Vector3 force, float deltaTime)
+    {
+        float maxAdjustedSpeed = 0.2f * MaxSpeed;
 
-			// combined banking, sum of UP due to turning and global UP
-			Vector3 bankUp = accelUp + globalUp;
+        if ((Speed > maxAdjustedSpeed) || (force == Vector3.Zero))
+            return force;
 
-			// blend bankUp into vehicle's UP basis vector
-			float smoothRate = elapsedTime * 3;
-			Vector3 tempUp = Up;
-			Utilities.BlendIntoAccumulator(smoothRate, bankUp, ref tempUp);
-			Up = Vector3.Normalize(tempUp);
+        float range = Speed / maxAdjustedSpeed;
+        float cosine = Utilities.Lerp(1.0f, -1.0f, (float)Math.Pow(range, 20));
+        return force.LimitMaxDeviationAngle(cosine, Forward);
+    }
 
-			annotation.Line(Position, Position + (globalUp * 4), Colors.White);
-	        annotation.Line(Position, Position + (bankUp * 4), Colors.Orange);
-			annotation.Line(Position, Position + (accelUp * 4), Colors.Red);
-	        annotation.Line(Position, Position + (Up * 1), Colors.Gold);
+    /// <summary>
+    /// apply a given braking force (for a given dt) to our momentum.
+    /// </summary>
+    /// <param name="rate"></param>
+    /// <param name="deltaTime"></param>
+    public void ApplyBrakingForce(float rate, float deltaTime)
+    {
+        float rawBraking = Speed * rate;
+        float clipBraking = ((rawBraking < MaxForce) ? rawBraking : MaxForce);
+        Speed = (Speed - (clipBraking * deltaTime));
+    }
 
-			// adjust orthonormal basis vectors to be aligned with new velocity
-			if (Speed > 0) RegenerateOrthonormalBasisUF(newVelocity / Speed);
-		}
+    /// <summary>
+    /// predict position of this vehicle at some time in the future (assumes velocity remains constant)
+    /// </summary>
+    /// <param name="predictionTime"></param>
+    /// <returns></returns>
+    public override Vector3 PredictFuturePosition(float predictionTime) => Position + (Velocity * predictionTime);
 
-		/// <summary>
-        /// adjust the steering force passed to applySteeringForce.
-        /// allows a specific vehicle class to redefine this adjustment.
-        /// default is to disallow backward-facing steering at low speed.
-		/// </summary>
-		/// <param name="force"></param>
-		/// <param name="deltaTime"></param>
-		/// <returns></returns>
-		protected virtual Vector3 AdjustRawSteeringForce(Vector3 force, float deltaTime)
-		{
-			float maxAdjustedSpeed = 0.2f * MaxSpeed;
+    // get instantaneous curvature (since last update)
+    protected float Curvature { get; private set; }
 
-			if ((Speed > maxAdjustedSpeed) || (force == Vector3.Zero))
-				return force;
+    // get/reset smoothedCurvature, smoothedAcceleration and smoothedPosition
+    public float SmoothedCurvature => smoothedCurvature;
 
-            float range = Speed / maxAdjustedSpeed;
-            float cosine = Utilities.Lerp(1.0f, -1.0f, (float)Math.Pow(range, 20));
-            return force.LimitMaxDeviationAngle(cosine, Forward);
-		}
+    void ResetSmoothedCurvature(float value = 0)
+    {
+        lastForward = Vector3.Zero;
+        lastPosition = Vector3.Zero;
+        smoothedCurvature = value;
+        Curvature = value;
+    }
 
-		/// <summary>
-        /// apply a given braking force (for a given dt) to our momentum.
-		/// </summary>
-		/// <param name="rate"></param>
-		/// <param name="deltaTime"></param>
-	    public void ApplyBrakingForce(float rate, float deltaTime)
-		{
-			float rawBraking = Speed * rate;
-			float clipBraking = ((rawBraking < MaxForce) ? rawBraking : MaxForce);
-			Speed = (Speed - (clipBraking * deltaTime));
-		}
+    public override Vector3 Acceleration => acceleration;
 
-		/// <summary>
-        /// predict position of this vehicle at some time in the future (assumes velocity remains constant)
-		/// </summary>
-		/// <param name="predictionTime"></param>
-		/// <returns></returns>
-        public override Vector3 PredictFuturePosition(float predictionTime)
-		{
-			return Position + (Velocity * predictionTime);
-		}
+    protected void ResetAcceleration() => ResetAcceleration(Vector3.Zero);
 
-		// get instantaneous curvature (since last update)
-	    protected float Curvature { get; private set; }
+    void ResetAcceleration(Vector3 value) => acceleration = value;
 
-	    // get/reset smoothedCurvature, smoothedAcceleration and smoothedPosition
-		public float SmoothedCurvature
-		{
-			get { return _smoothedCurvature; }
-		}
+    Vector3 smoothedPosition;
+    public Vector3 SmoothedPosition => smoothedPosition;
 
-	    private void ResetSmoothedCurvature(float value = 0)
-		{
-			_lastForward = Vector3.Zero;
-			_lastPosition = Vector3.Zero;
-	        _smoothedCurvature = value;
-            Curvature = value;
-		}
+    void ResetSmoothedPosition() => ResetSmoothedPosition(Vector3.Zero);
 
-		public override Vector3 Acceleration
-		{
-			get { return _acceleration; }
-		}
+    protected void ResetSmoothedPosition(Vector3 value) => smoothedPosition = value;
 
-	    protected void ResetAcceleration()
-	    {
-	        ResetAcceleration(Vector3.Zero);
-	    }
+    // set a random "2D" heading: set local Up to global Y, then effectively
+    // rotate about it by a random angle (pick random forward, derive side).
+    protected void RandomizeHeadingOnXZPlane()
+    {
+        Up = Vector3.UnitY;
+        Forward = Vector3Helpers.RandomUnitVectorOnXZPlane();
+        Side = Vector3.Cross(Forward, Up);
+    }
 
-	    private void ResetAcceleration(Vector3 value)
-	    {
-	        _acceleration = value;
-	    }
-
-        Vector3 _smoothedPosition;
-	    public Vector3 SmoothedPosition
-		{
-			get { return _smoothedPosition; }
-		}
-
-	    private void ResetSmoothedPosition()
-	    {
-	        ResetSmoothedPosition(Vector3.Zero);
-	    }
-
-	    protected void ResetSmoothedPosition(Vector3 value)
-	    {
-	        _smoothedPosition = value;
-	    }
-
-	    // set a random "2D" heading: set local Up to global Y, then effectively
-		// rotate about it by a random angle (pick random forward, derive side).
-	    protected void RandomizeHeadingOnXZPlane()
-		{
-			Up = Vector3.UnitY;
-            Forward = Vector3Helpers.RandomUnitVectorOnXZPlane();
-	        Side = Vector3.Cross(Forward, Up);
-		}
-
-		// measure path curvature (1/turning-radius), maintain smoothed version
-		void MeasurePathCurvature(float elapsedTime)
-		{
-			if (elapsedTime > 0)
-			{
-				Vector3 dP = _lastPosition - Position;
-				Vector3 dF = (_lastForward - Forward) / dP.Length();
-                Vector3 lateral = Vector3Helpers.PerpendicularComponent(dF, Forward);
-                float sign = (Vector3.Dot(lateral, Side) < 0) ? 1.0f : -1.0f;
-				Curvature = lateral.Length() * sign;
-				Utilities.BlendIntoAccumulator(elapsedTime * 4.0f, Curvature, ref _smoothedCurvature);
-				_lastForward = Forward;
-				_lastPosition = Position;
-			}
-		}
-	}
+    // measure path curvature (1/turning-radius), maintain smoothed version
+    void MeasurePathCurvature(float elapsedTime)
+    {
+        if (elapsedTime > 0)
+        {
+            Vector3 dP = lastPosition - Position;
+            Vector3 dF = (lastForward - Forward) / dP.Length();
+            Vector3 lateral = Vector3Helpers.PerpendicularComponent(dF, Forward);
+            float sign = (Vector3.Dot(lateral, Side) < 0) ? 1.0f : -1.0f;
+            Curvature = lateral.Length() * sign;
+            Utilities.BlendIntoAccumulator(elapsedTime * 4.0f, Curvature, ref smoothedCurvature);
+            lastForward = Forward;
+            lastPosition = Position;
+        }
+    }
 }

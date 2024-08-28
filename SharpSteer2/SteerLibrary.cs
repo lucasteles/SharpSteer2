@@ -8,122 +8,70 @@
 // you should have received as part of this distribution. The terms
 // are also available at http://www.codeplex.com/SharpSteer/Project/License.aspx.
 
-using System.Collections.Generic;
-using System.Numerics;
 using SharpSteer2.Helpers;
 using SharpSteer2.Obstacles;
 using SharpSteer2.Pathway;
 
-namespace SharpSteer2
+namespace SharpSteer2;
+
+public abstract class SteerLibrary : BaseVehicle
 {
-	public abstract class SteerLibrary : BaseVehicle
-	{
-	    protected IAnnotationService annotation { get; private set; }
+    protected IAnnotationService Annotation { get; private set; }
 
-	    // Constructor: initializes state
-	    protected SteerLibrary(IAnnotationService annotationService = null)
-		{
-            annotation = annotationService ?? new NullAnnotationService();
+    // Constructor: initializes state
+    protected SteerLibrary(IAnnotationService annotationService = null)
+    {
+        Annotation = annotationService ?? new NullAnnotationService();
 
-			// set inital state
-			Reset();
-		}
+        // set inital state
+        Reset();
+    }
 
-		// reset state
-		public virtual void Reset()
-		{
-			// initial state of wander behavior
-			_wanderSide = 0;
-			_wanderUp = 0;
-		}
+    // reset state
+    public virtual void Reset()
+    {
+        // initial state of wander behavior
+        wanderSide = 0;
+        wanderUp = 0;
+    }
 
-        #region steering behaviours
-	    private float _wanderSide;
-	    private float _wanderUp;
-	    protected Vector3 SteerForWander(float dt)
-	    {
-	        return this.SteerForWander(dt, ref _wanderSide, ref _wanderUp);
-	    }
+    #region steering behaviours
 
-	    protected Vector3 SteerForFlee(Vector3 target)
-	    {
-	        return this.SteerForFlee(target, MaxSpeed);
-	    }
+    float wanderSide;
+    float wanderUp;
+    protected Vector3 SteerForWander(float dt) => this.SteerForWander(dt, ref wanderSide, ref wanderUp);
 
-	    protected Vector3 SteerForSeek(Vector3 target)
-	    {
-	        return this.SteerForSeek(target, MaxSpeed);
-		}
+    protected Vector3 SteerForFlee(Vector3 target) => this.SteerForFlee(target, MaxSpeed);
 
-        protected Vector3 SteerForArrival(Vector3 target, float slowingDistance)
-	    {
-	        return this.SteerForArrival(target, MaxSpeed, slowingDistance, annotation);
-	    }
+    protected Vector3 SteerForSeek(Vector3 target) => this.SteerForSeek(target, MaxSpeed);
 
-	    protected Vector3 SteerToFollowFlowField(IFlowField field, float predictionTime)
-	    {
-	        return this.SteerToFollowFlowField(field, MaxSpeed, predictionTime, annotation);
-	    }
+    protected Vector3 SteerForArrival(Vector3 target, float slowingDistance) => this.SteerForArrival(target, MaxSpeed, slowingDistance, Annotation);
 
-        protected Vector3 SteerToFollowPath(bool direction, float predictionTime, IPathway path)
-	    {
-	        return this.SteerToFollowPath(direction, predictionTime, path, MaxSpeed, annotation);
-	    }
+    protected Vector3 SteerToFollowFlowField(IFlowField field, float predictionTime) => this.SteerToFollowFlowField(field, MaxSpeed, predictionTime, Annotation);
 
-        protected Vector3 SteerToStayOnPath(float predictionTime, IPathway path)
-	    {
-	        return this.SteerToStayOnPath(predictionTime, path, MaxSpeed, annotation);
-	    }
+    protected Vector3 SteerToFollowPath(bool direction, float predictionTime, IPathway path) => this.SteerToFollowPath(direction, predictionTime, path, MaxSpeed, Annotation);
 
-        protected Vector3 SteerToAvoidObstacle(float minTimeToCollision, IObstacle obstacle)
-        {
-            return this.SteerToAvoidObstacle(minTimeToCollision, obstacle, annotation);
-        }
+    protected Vector3 SteerToStayOnPath(float predictionTime, IPathway path) => this.SteerToStayOnPath(predictionTime, path, MaxSpeed, Annotation);
 
-	    protected Vector3 SteerToAvoidObstacles(float minTimeToCollision, IEnumerable<IObstacle> obstacles)
-	    {
-	        return this.SteerToAvoidObstacles(minTimeToCollision, obstacles, annotation);
-	    }
+    protected Vector3 SteerToAvoidObstacle(float minTimeToCollision, IObstacle obstacle) => this.SteerToAvoidObstacle(minTimeToCollision, obstacle, Annotation);
 
-	    protected Vector3 SteerToAvoidNeighbors(float minTimeToCollision, IEnumerable<IVehicle> others)
-		{
-	        return this.SteerToAvoidNeighbors(minTimeToCollision, others, annotation);
-	    }
+    protected Vector3 SteerToAvoidObstacles(float minTimeToCollision, IEnumerable<IObstacle> obstacles) => this.SteerToAvoidObstacles(minTimeToCollision, obstacles, Annotation);
 
-	    protected Vector3 SteerToAvoidCloseNeighbors<TVehicle>(float minSeparationDistance, IEnumerable<TVehicle> others) where TVehicle : IVehicle
-        {
-            return this.SteerToAvoidCloseNeighbors<TVehicle>(minSeparationDistance, others, annotation);
-        }
+    protected Vector3 SteerToAvoidNeighbors(float minTimeToCollision, IEnumerable<IVehicle> others) => this.SteerToAvoidNeighbors(minTimeToCollision, others, Annotation);
 
-	    protected Vector3 SteerForSeparation(float maxDistance, float cosMaxAngle, IEnumerable<IVehicle> flock)
-	    {
-	        return this.SteerForSeparation(maxDistance, cosMaxAngle, flock, annotation);
-	    }
+    protected Vector3 SteerToAvoidCloseNeighbors<TVehicle>(float minSeparationDistance, IEnumerable<TVehicle> others) where TVehicle : IVehicle => this.SteerToAvoidCloseNeighbors<TVehicle>(minSeparationDistance, others, Annotation);
 
-	    protected Vector3 SteerForAlignment(float maxDistance, float cosMaxAngle, IEnumerable<IVehicle> flock)
-	    {
-	        return this.SteerForAlignment(maxDistance, cosMaxAngle, flock, annotation);
-	    }
+    protected Vector3 SteerForSeparation(float maxDistance, float cosMaxAngle, IEnumerable<IVehicle> flock) => this.SteerForSeparation(maxDistance, cosMaxAngle, flock, Annotation);
 
-	    protected Vector3 SteerForCohesion(float maxDistance, float cosMaxAngle, IEnumerable<IVehicle> flock)
-	    {
-	        return this.SteerForCohesion(maxDistance, cosMaxAngle, flock, annotation);
-	    }
+    protected Vector3 SteerForAlignment(float maxDistance, float cosMaxAngle, IEnumerable<IVehicle> flock) => this.SteerForAlignment(maxDistance, cosMaxAngle, flock, Annotation);
 
-	    protected Vector3 SteerForPursuit(IVehicle quarry, float maxPredictionTime = float.MaxValue)
-	    {
-	        return this.SteerForPursuit(quarry, maxPredictionTime, MaxSpeed, annotation);
-	    }
+    protected Vector3 SteerForCohesion(float maxDistance, float cosMaxAngle, IEnumerable<IVehicle> flock) => this.SteerForCohesion(maxDistance, cosMaxAngle, flock, Annotation);
 
-        protected Vector3 SteerForEvasion(IVehicle menace, float maxPredictionTime)
-        {
-            return this.SteerForEvasion(menace, maxPredictionTime, MaxSpeed, annotation);
-        }
+    protected Vector3 SteerForPursuit(IVehicle quarry, float maxPredictionTime = float.MaxValue) => this.SteerForPursuit(quarry, maxPredictionTime, MaxSpeed, Annotation);
 
-	    protected Vector3 SteerForTargetSpeed(float targetSpeed)
-	    {
-	        return this.SteerForTargetSpeed(targetSpeed, MaxForce, annotation);
-	    }
-        #endregion
-	}
+    protected Vector3 SteerForEvasion(IVehicle menace, float maxPredictionTime) => this.SteerForEvasion(menace, maxPredictionTime, MaxSpeed, Annotation);
+
+    protected Vector3 SteerForTargetSpeed(float targetSpeed) => this.SteerForTargetSpeed(targetSpeed, MaxForce, Annotation);
+
+    #endregion
 }

@@ -8,20 +8,19 @@
 // are also available at http://www.codeplex.com/SharpSteer/Project/License.aspx.
 
 
-namespace SharpSteer2.Database
-{
-	public interface IProximityDatabase<ContentType>
-	{
-		/// <summary>
-        /// allocate a token to represent a given client object in this database
-		/// </summary>
-		/// <param name="parentObject"></param>
-		/// <returns></returns>
-		ITokenForProximityDatabase<ContentType> AllocateToken(ContentType parentObject);
+namespace SharpSteer2.Database;
 
-		/// <summary>
-        /// returns the number of tokens in the proximity database
-		/// </summary>
-		int Count { get; }
-	}
+public interface IProximityDatabase<TContentType>
+{
+    /// <summary>
+    /// allocate a token to represent a given client object in this database
+    /// </summary>
+    /// <param name="parentObject"></param>
+    /// <returns></returns>
+    ITokenForProximityDatabase<TContentType> AllocateToken(TContentType parentObject);
+
+    /// <summary>
+    /// returns the number of tokens in the proximity database
+    /// </summary>
+    int Count { get; }
 }

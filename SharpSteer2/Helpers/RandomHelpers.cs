@@ -1,45 +1,23 @@
-﻿using System;
+﻿namespace SharpSteer2.Helpers;
 
-namespace SharpSteer2.Helpers
+public static class RandomHelpers
 {
-    public class RandomHelpers
-    {
-        [ThreadStatic]
-        private static Random _rng;
+    static Random Rng => System.Random.Shared;
 
-        private static Random rng
-        {
-            get
-            {
-                if (_rng == null)
-                    _rng = new Random();
-                return _rng;
-            }
-        }
+    /// <summary>
+    /// Returns a float randomly distributed between 0 and 1
+    /// </summary>
+    /// <returns></returns>
+    public static float Random() => (float)Rng.NextDouble();
 
-        /// <summary>
-        /// Returns a float randomly distributed between 0 and 1
-        /// </summary>
-        /// <returns></returns>
-        public static float Random()
-        {
-            return (float)rng.NextDouble();
-        }
+    /// <summary>
+    /// Returns a float randomly distributed between lowerBound and upperBound
+    /// </summary>
+    /// <param name="lowerBound"></param>
+    /// <param name="upperBound"></param>
+    /// <returns></returns>
+    public static float Random(float lowerBound, float upperBound) =>
+        lowerBound + (Random() * (upperBound - lowerBound));
 
-        /// <summary>
-        /// Returns a float randomly distributed between lowerBound and upperBound
-        /// </summary>
-        /// <param name="lowerBound"></param>
-        /// <param name="upperBound"></param>
-        /// <returns></returns>
-        public static float Random(float lowerBound, float upperBound)
-        {
-            return lowerBound + (Random() * (upperBound - lowerBound));
-        }
-
-        public static int RandomInt(int min, int max)
-        {
-            return (int)Random(min, max);
-        }
-    }
+    public static int RandomInt(int min, int max) => (int)Random(min, max);
 }

@@ -1,42 +1,40 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Numerics;
+﻿using System.Numerics;
 using SharpSteer2.Obstacles;
 
-namespace SharpSteer2.Tests
+namespace SharpSteer2.Tests;
+
+[TestClass]
+public class SphericalObstacleTests
 {
-    [TestClass]
-    public class SphericalObstacleTests
+    readonly SphericalObstacle obstacle = new(10, Vector3.Zero);
+
+    readonly SimpleVehicle vehicle = new();
+
+    [TestMethod]
+    public void SteerToAvoidReturnsZeroVectorIfThereIsNoIntersection()
     {
-        private readonly SphericalObstacle _obstacle = new SphericalObstacle(10, Vector3.Zero);
+        vehicle.Position = new(100, 100, 100);
 
-        private readonly SimpleVehicle _vehicle = new SimpleVehicle();
+        Assert.AreEqual(Vector3.Zero, obstacle.SteerToAvoid(vehicle, 1));
+    }
 
-        [TestMethod]
-        public void SteerToAvoidReturnsZeroVectorIfThereIsNoIntersection()
-        {
-            _vehicle.Position = new Vector3(100, 100, 100);
+    [TestMethod]
+    public void SteerToAvoidReturnsNonZeroVectorForStationaryVehicleInsideObstacle()
+    {
+        vehicle.Position = new(0, 0, 1);
 
-            Assert.AreEqual(Vector3.Zero, _obstacle.SteerToAvoid(_vehicle, 1));
-        }
+        Assert.AreNotEqual(Vector3.Zero, obstacle.SteerToAvoid(vehicle, 1));
+    }
 
-        [TestMethod]
-        public void SteerToAvoidReturnsNonZeroVectorForStationaryVehicleInsideObstacle()
-        {
-            _vehicle.Position = new Vector3(0, 0, 1);
+    [TestMethod]
+    public void SteerToAvoidReturnsNonZeroVectorForMovingVehicleOutsideObstacle()
+    {
+        vehicle.Position = -vehicle.Forward * 11;
+        vehicle.ApplySteeringForce(vehicle.Forward, 3);
 
-            Assert.AreNotEqual(Vector3.Zero, _obstacle.SteerToAvoid(_vehicle, 1));
-        }
+        var f = obstacle.SteerToAvoid(vehicle, 10);
+        var dot = Vector3.Dot(vehicle.Position - obstacle.Center, f);
 
-        [TestMethod]
-        public void SteerToAvoidReturnsNonZeroVectorForMovingVehicleOutsideObstacle()
-        {
-            _vehicle.Position = -_vehicle.Forward * 11;
-            _vehicle.ApplySteeringForce(_vehicle.Forward, 3);
-
-            var f = _obstacle.SteerToAvoid(_vehicle, 10);
-            var dot = Vector3.Dot(_vehicle.Position - _obstacle.Center, f);
-
-            Assert.IsTrue(dot >= 0);
-        }
+        Assert.IsTrue(dot >= 0);
     }
 }

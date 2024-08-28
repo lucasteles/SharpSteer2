@@ -8,26 +8,21 @@
 // you should have received as part of this distribution. The terms
 // are also available at http://www.codeplex.com/SharpSteer/Project/License.aspx.
 
-using System;
-using System.Collections.Generic;
-using System.Numerics;
+namespace SharpSteer2.Database;
 
-namespace SharpSteer2.Database
+public interface ITokenForProximityDatabase<TContentType> : IDisposable
 {
-	public interface ITokenForProximityDatabase<ContentType> : IDisposable
-	{
-		/// <summary>
-        /// the client object calls this each time its position changes
-		/// </summary>
-		/// <param name="position"></param>
-        void UpdateForNewPosition(Vector3 position);
+    /// <summary>
+    /// the client object calls this each time its position changes
+    /// </summary>
+    /// <param name="position"></param>
+    void UpdateForNewPosition(Vector3 position);
 
-		/// <summary>
-        /// find all neighbors within the given sphere (as center and radius)
-		/// </summary>
-		/// <param name="center"></param>
-		/// <param name="radius"></param>
-		/// <param name="results"></param>
-        void FindNeighbors(Vector3 center, float radius, List<ContentType> results);
-	}
+    /// <summary>
+    /// find all neighbors within the given sphere (as center and radius)
+    /// </summary>
+    /// <param name="center"></param>
+    /// <param name="radius"></param>
+    /// <param name="results"></param>
+    void FindNeighbors(Vector3 center, float radius, List<TContentType> results);
 }

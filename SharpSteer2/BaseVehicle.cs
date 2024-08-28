@@ -8,21 +8,18 @@
 // you should have received as part of this distribution. The terms
 // are also available at http://www.codeplex.com/SharpSteer/Project/License.aspx.
 
-using System.Numerics;
+namespace SharpSteer2;
 
-namespace SharpSteer2
+public abstract class BaseVehicle : LocalSpace, IVehicle
 {
-	public abstract class BaseVehicle : LocalSpace, IVehicle
-	{
-		public abstract float Mass { get; set; }
-		public abstract float Radius { get; set; }
-        public abstract Vector3 Velocity { get; }
-		public abstract Vector3 Acceleration { get; }
-		public abstract float Speed { get; set; }
+    public abstract float Mass { get; set; }
+    public abstract float Radius { get; set; }
+    public abstract Vector3 Velocity { get; }
+    public abstract Vector3 Acceleration { get; }
+    public abstract float Speed { get; set; }
 
-        public abstract Vector3 PredictFuturePosition(float predictionTime);
+    public abstract Vector3 PredictFuturePosition(float predictionTime);
 
-		public abstract float MaxForce { get; }
-		public abstract float MaxSpeed { get; }
-	}
+    public abstract float MaxForce { get; }
+    public abstract float MaxSpeed { get; }
 }

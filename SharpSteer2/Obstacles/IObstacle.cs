@@ -8,18 +8,15 @@
 // you should have received as part of this distribution. The terms
 // are also available at http://www.codeplex.com/SharpSteer/Project/License.aspx.
 
-using System.Numerics;
+namespace SharpSteer2.Obstacles;
 
-namespace SharpSteer2.Obstacles
+/// <summary>
+/// Obstacle: a pure virtual base class for an abstract shape in space, to be
+/// used with obstacle avoidance.
+/// </summary>
+public interface IObstacle
 {
-	/// <summary>
-	/// Obstacle: a pure virtual base class for an abstract shape in space, to be
-	/// used with obstacle avoidance.
-	/// </summary>
-	public interface IObstacle
-	{
-        Vector3 SteerToAvoid(IVehicle v, float minTimeToCollision);
+    Vector3 SteerToAvoid(IVehicle v, float minTimeToCollision);
 
-        float? NextIntersection(IVehicle vehicle);
-	}
+    float? NextIntersection(IVehicle vehicle);
 }

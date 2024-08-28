@@ -2,9 +2,13 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <!-- <Nullable>enable</Nullable> -->
+    <!--     <Nullable>enable</Nullable> -->
     <PackageId>SharpSteer</PackageId>
     <Description>A .Net Port of OpenSteer</Description>
     <PackageTags>OpenSteer, steer, ia, steering, behaviours game</PackageTags>
   </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="SharpSteer2.Tests"/>
+  </ItemGroup>
 </Project>

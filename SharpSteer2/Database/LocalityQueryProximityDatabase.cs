@@ -66,88 +66,69 @@
 
 */
 
-using System;
-using System.Collections.Generic;
-using System.Numerics;
+namespace SharpSteer2.Database;
 
-namespace SharpSteer2.Database
+/// <summary>
+/// A AbstractProximityDatabase-style wrapper for the LQ bin lattice system
+/// </summary>
+public class LocalityQueryProximityDatabase<T> : IProximityDatabase<T> where T : class
 {
-	/// <summary>
-	/// A AbstractProximityDatabase-style wrapper for the LQ bin lattice system
-	/// </summary>
-	public class LocalityQueryProximityDatabase<T> : IProximityDatabase<T> where T : class
-	{
-		/// <summary>
-        /// "token" to represent objects stored in the database
-		/// </summary>
-		private sealed class TokenType : ITokenForProximityDatabase<T>
-		{
-			LocalityQueryDatabase.ClientProxy _proxy;
-		    readonly LocalityQueryDatabase _lq;
+    /// <summary>
+    /// "token" to represent objects stored in the database
+    /// </summary>
+    sealed class TokenType(T parentObject, LocalityQueryProximityDatabase<T> lqsd)
+        : ITokenForProximityDatabase<T>
+    {
+        LocalityQueryDatabase.ClientProxy proxy = new(parentObject);
+        readonly LocalityQueryDatabase lq = lqsd.lq;
 
-			public TokenType(T parentObject, LocalityQueryProximityDatabase<T> lqsd)
-			{
-				_proxy = new LocalityQueryDatabase.ClientProxy(parentObject);
-			    _lq = lqsd._lq;
-			}
+        public void Dispose()
+        {
+            if (proxy is null)
+                return;
 
-		    public void Dispose()
-			{
-		        if (_proxy == null)
-		            return;
+            lq.RemoveFromBin(proxy);
+            proxy = null;
+        }
 
-		        _lq.RemoveFromBin(_proxy);
-		        _proxy = null;
-			}
+        // the client obj calls this each time its position changes
+        public void UpdateForNewPosition(Vector3 p) => lq.UpdateForNewLocation(proxy, p);
 
-			// the client obj calls this each time its position changes
-            public void UpdateForNewPosition(Vector3 p)
-			{
-				_lq.UpdateForNewLocation(_proxy, p);
-			}
+        // find all neighbors within the given sphere (as center and radius)
+        public void FindNeighbors(Vector3 center, float radius, List<T> results) => lq.MapOverAllObjectsInLocality(center, radius, PerNeighborCallBackFunction, results);
 
-			// find all neighbors within the given sphere (as center and radius)
-            public void FindNeighbors(Vector3 center, float radius, List<T> results)
-			{
-				_lq.MapOverAllObjectsInLocality(center, radius, perNeighborCallBackFunction, results);
-			}
+        // called by LQ for each clientObject in the specified neighborhood:
+        // push that clientObject onto the ContentType vector in void*
+        // clientQueryState
+        static void PerNeighborCallBackFunction(object clientObject, float distanceSquared, object clientQueryState)
+        {
+            List<T> results = (List<T>)clientQueryState;
+            results.Add((T)clientObject);
+        }
+    }
 
-			// called by LQ for each clientObject in the specified neighborhood:
-			// push that clientObject onto the ContentType vector in void*
-			// clientQueryState
-		    private static void perNeighborCallBackFunction(Object clientObject, float distanceSquared, Object clientQueryState)
-			{
-				List<T> results = (List<T>)clientQueryState;
-				results.Add((T)clientObject);
-			}
-		}
+    readonly LocalityQueryDatabase lq;
 
-	    readonly LocalityQueryDatabase _lq;
+    // constructor
+    public LocalityQueryProximityDatabase(Vector3 center, Vector3 dimensions, Vector3 divisions)
+    {
+        Vector3 halfsize = dimensions * 0.5f;
+        Vector3 origin = center - halfsize;
 
-		// constructor
-        public LocalityQueryProximityDatabase(Vector3 center, Vector3 dimensions, Vector3 divisions)
-		{
-			Vector3 halfsize = dimensions * 0.5f;
-			Vector3 origin = center - halfsize;
+        lq = new(origin, dimensions, (int)Math.Round(divisions.X), (int)Math.Round(divisions.Y), (int)Math.Round(divisions.Z));
+    }
 
-			_lq = new LocalityQueryDatabase(origin, dimensions, (int)Math.Round(divisions.X), (int)Math.Round(divisions.Y), (int)Math.Round(divisions.Z));
-		}
+    // allocate a token to represent a given client obj in this database
+    public ITokenForProximityDatabase<T> AllocateToken(T parentObject) => new TokenType(parentObject, this);
 
-		// allocate a token to represent a given client obj in this database
-		public ITokenForProximityDatabase<T> AllocateToken(T parentObject)
-		{
-			return new TokenType(parentObject, this);
-		}
-
-		// count the number of tokens currently in the database
-		public int Count
-		{
-			get
-			{
-				int count = 0;
-				_lq.MapOverAllObjects((a, b, c) => count++, count);
-				return count;
-			}
-		}
-	}
+    // count the number of tokens currently in the database
+    public int Count
+    {
+        get
+        {
+            int count = 0;
+            lq.MapOverAllObjects((a, b, c) => count++, count);
+            return count;
+        }
+    }
 }
