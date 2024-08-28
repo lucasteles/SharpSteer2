@@ -1,3 +1,5 @@
+[![Nuget](https://img.shields.io/nuget/v/SharpSteer.svg?style=flat)](https://www.nuget.org/packages/SharpSteer)
+
 SharpSteer is a C# port of OpenSteer. Like OpenSteer, the aim of SharpSteer is to help construct steering behaviors for autonomous characters in games and animation.
 
 Like OpenSteer, SharpSteer provides a XNA-based application which demonstrates predefined steering behaviors. The user can quickly prototype, visualize, annotate and debug new steering behaviors by writing a plug-in for this Demo application.
@@ -14,6 +16,10 @@ This fork of SharpSteer includes:
 ### Nuget
 
 SharpSteer is [available](https://www.nuget.org/packages/SharpSteer/) as a nuget package.
+
+```ps
+$ dotnet add package SharpSteer
+```
 
 ### Documentation
 
