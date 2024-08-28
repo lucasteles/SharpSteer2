@@ -76,7 +76,7 @@ public static class VehicleHelpers
         // our predicted future position was outside the path, need to
         // steer towards it.  Use onPath projection of futurePosition
         // as seek target
-        if (annotation != null)
+        if (annotation is not null)
             annotation.PathFollowing(futurePosition, onPath, onPath, outside);
 
         return vehicle.SteerForSeek(onPath, maxSpeed);
@@ -131,7 +131,7 @@ public static class VehicleHelpers
                     break;
                 seek = s;
 
-                if (annotation != null)
+                if (annotation is not null)
                     annotation.Circle3D(0.3f, seek, Vector3.UnitX, Colors.Green, 6);
             }
 
@@ -144,7 +144,7 @@ public static class VehicleHelpers
         var targetPathDistance = currentPathDistance + pathDistanceOffset;
         var target = path.MapPathDistanceToPoint(targetPathDistance);
 
-        if (annotation != null)
+        if (annotation is not null)
             annotation.PathFollowing(futurePosition, onPath, target, outside);
 
         // return steering to seek target on path
@@ -171,7 +171,7 @@ public static class VehicleHelpers
         var avoidance = obstacle.SteerToAvoid(vehicle, minTimeToCollision);
 
         // XXX more annotation modularity problems (assumes spherical obstacle)
-        if (avoidance != Vector3.Zero && annotation != null)
+        if (avoidance != Vector3.Zero && annotation is not null)
             annotation.AvoidObstacle(minTimeToCollision * vehicle.Speed);
 
         return avoidance;
@@ -201,7 +201,7 @@ public static class VehicleHelpers
 
         if (nearest.HasValue)
         {
-            if (annotation != null)
+            if (annotation is not null)
                 annotation.AvoidObstacle(minDistanceToCollision);
 
             return nearest.Value.Obstacle.SteerToAvoid(vehicle, minTimeToCollision);
@@ -273,7 +273,7 @@ public static class VehicleHelpers
 
                 if (currentDistance < minCenterToCenter)
                 {
-                    if (annotation != null)
+                    if (annotation is not null)
                         annotation.AvoidCloseNeighbor(other, minSeparationDistance);
 
                     return Vector3Helpers.PerpendicularComponent(-offset, vehicle.Forward);
@@ -380,8 +380,7 @@ public static class VehicleHelpers
         var target = quarry.PredictFuturePosition(etl);
 
         // annotation
-        if (annotation != null)
-            annotation.Line(vehicle.Position, target, Colors.DarkGray);
+        annotation?.Line(vehicle.Position, target, Colors.DarkGray);
 
         return SteerForSeek(vehicle, target, maxSpeed, annotation);
     }
@@ -479,7 +478,7 @@ public static class VehicleHelpers
         }
 
         // if a potential collision was found, compute steering to avoid
-        if (threat != null)
+        if (threat is not null)
         {
             // parallel: +1, perpendicular: 0, anti-parallel: -1
             var parallelness = Vector3.Dot(vehicle.Forward, threat.Forward);
@@ -514,7 +513,7 @@ public static class VehicleHelpers
                 }
             }
 
-            if (annotation != null)
+            if (annotation is not null)
                 annotation.AvoidNeighbor(threat, steer, xxxOurPositionAtNearestApproach,
                     xxxThreatPositionAtNearestApproach);
         }

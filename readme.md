@@ -13,7 +13,7 @@ This fork of SharpSteer includes:
 
 ### Nuget
 
-SharpSteer2 is [available](https://www.nuget.org/packages/SharpSteer2/) as a nuget package. Package releases use [semantic versioning](http://semver.org/).
+SharpSteer is [available](https://www.nuget.org/packages/SharpSteer/) as a nuget package.
 
 ### Documentation
 

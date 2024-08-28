@@ -17,10 +17,10 @@ public class NullAnnotationTest
         a.Circle3D(0, Vector3.Zero, Vector3.Zero, Colors.White, 0);
         a.CircleOrDisk(0, Vector3.Zero, Vector3.Zero, Colors.White, 0, true, true);
         a.CircleOrDisk3D(0, Vector3.Zero, Vector3.Zero, Colors.White, 0, true);
-        a.CircleOrDiskXz(0, Vector3.Zero, Colors.White, 0, true);
-        a.CircleXz(0, Vector3.Zero, Colors.White, 0);
+        a.CircleOrDiskXZ(0, Vector3.Zero, Colors.White, 0, true);
+        a.CircleXZ(0, Vector3.Zero, Colors.White, 0);
         a.Disk3D(0, Vector3.Zero, Vector3.Zero, Colors.White, 0);
-        a.DiskXz(0, Vector3.Zero, Colors.White, 0);
+        a.DiskXZ(0, Vector3.Zero, Colors.White, 0);
         a.Line(Vector3.Zero, Vector3.Zero, Colors.White);
         a.PathFollowing(Vector3.Zero, Vector3.Zero, Vector3.Zero, 0);
         a.VelocityAcceleration(null);

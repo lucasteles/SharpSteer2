@@ -1,7 +1,0 @@
-C:\Users\Martin\Documents\dotnet\SharpSteer2\Demo.ContentShim\bin\x86\Release\Demo.ContentShim.dll
-C:\Users\Martin\Documents\dotnet\SharpSteer2\Demo.ContentShim\bin\x86\Release\Demo.ContentShim.pdb
-C:\Users\Martin\Documents\dotnet\SharpSteer2\Demo.ContentShim\obj\x86\Release\Demo.ContentShim.csprojResolveAssemblyReference.cache
-C:\Users\Martin\Documents\dotnet\SharpSteer2\Demo.ContentShim\obj\x86\Release\Microsoft.Xna.Framework.RuntimeProfile.txt
-C:\Users\Martin\Documents\dotnet\SharpSteer2\Demo.ContentShim\obj\x86\Release\Demo.ContentShim.dll
-C:\Users\Martin\Documents\dotnet\SharpSteer2\Demo.ContentShim\obj\x86\Release\Demo.ContentShim.pdb
-C:\Users\Martin\Documents\dotnet\SharpSteer2\Demo.ContentShim\bin\x86\Release\Content\Fonts\SegoeUiMono.xnb

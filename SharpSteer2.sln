@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpSteer2", "SharpSteer2\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpSteer2.Tests", "SharpSteer2.Tests\SharpSteer2.Tests.csproj", "{663A5347-6887-4A29-A7E5-1DDF11ABD452}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpSteer2.Demo", "SharpSteer2.Demo\SharpSteer2.Demo.csproj", "{C5684473-0C68-4F61-A7D3-503FE87BC415}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{663A5347-6887-4A29-A7E5-1DDF11ABD452}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{663A5347-6887-4A29-A7E5-1DDF11ABD452}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{663A5347-6887-4A29-A7E5-1DDF11ABD452}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5684473-0C68-4F61-A7D3-503FE87BC415}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5684473-0C68-4F61-A7D3-503FE87BC415}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5684473-0C68-4F61-A7D3-503FE87BC415}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5684473-0C68-4F61-A7D3-503FE87BC415}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

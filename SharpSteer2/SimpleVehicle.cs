@@ -29,7 +29,7 @@ public class SimpleVehicle(IAnnotationService annotations = null) : SteerLibrary
     // get velocity of vehicle
     public override Vector3 Velocity => Forward * Speed;
 
-    // get/set speed of vehicle  (may be faster than taking mag of velocity)
+    // get/set speed of vehicle  (perhaps faster than taking mag of velocity)
     // speed along Forward direction. Because local space is
     // velocity-aligned, velocity = Forward * Speed
     public override float Speed { get; set; }

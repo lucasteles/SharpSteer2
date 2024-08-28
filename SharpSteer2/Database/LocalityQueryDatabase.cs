@@ -246,7 +246,7 @@ class LocalityQueryDatabase
     static void TraverseBinClientObjectList(ClientProxy co, float radiusSquared, LQCallBackFunction func,
         object state, Vector3 position)
     {
-        while (co != null)
+        while (co is not null)
         {
             // compute distance (squared) from this client obj to given
             // locality sphere's centerpoint
@@ -348,7 +348,7 @@ class LocalityQueryDatabase
         object clientQueryState)
     {
         // walk down proxy list, applying call-back function to each one
-        while (binProxyList != null)
+        while (binProxyList is not null)
         {
             func(binProxyList.Obj, 0, clientQueryState);
             binProxyList = binProxyList.Next;
@@ -370,7 +370,7 @@ class LocalityQueryDatabase
     public void RemoveFromBin(ClientProxy obj)
     {
         /* adjust pointers if obj is currently in a bin */
-        if (obj.Bin != null)
+        if (obj.Bin is not null)
         {
             /* If this obj is at the head of the list, move the bin
                pointer to the next item in the list (might be null). */
@@ -379,12 +379,12 @@ class LocalityQueryDatabase
 
             /* If there is a prev obj, link its "next" pointer to the
                obj after this one. */
-            if (obj.Prev != null)
+            if (obj.Prev is not null)
                 obj.Prev.Next = obj.Next;
 
             /* If there is a next obj, link its "prev" pointer to the
                obj before this one. */
-            if (obj.Next != null)
+            if (obj.Next is not null)
                 obj.Next.Prev = obj.Prev;
         }
 

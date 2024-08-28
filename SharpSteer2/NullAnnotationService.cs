@@ -10,15 +10,15 @@ class NullAnnotationService : IAnnotationService
 
     public void Line(Vector3 startPoint, Vector3 endPoint, Vector3 color, float opacity = 1) { }
 
-    public void CircleXz(float radius, Vector3 center, Vector3 color, int segments) { }
+    public void CircleXZ(float radius, Vector3 center, Vector3 color, int segments) { }
 
-    public void DiskXz(float radius, Vector3 center, Vector3 color, int segments) { }
+    public void DiskXZ(float radius, Vector3 center, Vector3 color, int segments) { }
 
     public void Circle3D(float radius, Vector3 center, Vector3 axis, Vector3 color, int segments) { }
 
     public void Disk3D(float radius, Vector3 center, Vector3 axis, Vector3 color, int segments) { }
 
-    public void CircleOrDiskXz(float radius, Vector3 center, Vector3 color, int segments, bool filled) { }
+    public void CircleOrDiskXZ(float radius, Vector3 center, Vector3 color, int segments, bool filled) { }
 
     public void CircleOrDisk3D(float radius, Vector3 center, Vector3 axis, Vector3 color, int segments, bool filled) { }
 

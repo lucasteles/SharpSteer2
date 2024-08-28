@@ -48,7 +48,7 @@ public interface IAnnotationService
     /// <param name="center">The center of the circle.</param>
     /// <param name="color">The color of the circle.</param>
     /// <param name="segments">The number of segments to use to draw the circle.</param>
-    void CircleXz(float radius, Vector3 center, Vector3 color, int segments);
+    void CircleXZ(float radius, Vector3 center, Vector3 color, int segments);
 
     /// <summary>
     ///     Draws a disk on the XZ plane.
@@ -57,7 +57,7 @@ public interface IAnnotationService
     /// <param name="center">The center of the disk.</param>
     /// <param name="color">The color of the disk.</param>
     /// <param name="segments">The number of segments to use to draw the disk.</param>
-    void DiskXz(float radius, Vector3 center, Vector3 color, int segments);
+    void DiskXZ(float radius, Vector3 center, Vector3 color, int segments);
 
     /// <summary>
     ///     Draws a circle perpendicular to the given axis.
@@ -87,7 +87,7 @@ public interface IAnnotationService
     /// <param name="color">The color of the circle/disk.</param>
     /// <param name="segments">The number of segments to use to draw the circle/disk.</param>
     /// <param name="filled">Flag indicating whether to draw a disk or circle.</param>
-    void CircleOrDiskXz(float radius, Vector3 center, Vector3 color, int segments, bool filled);
+    void CircleOrDiskXZ(float radius, Vector3 center, Vector3 color, int segments, bool filled);
 
     /// <summary>
     ///     Draws a circle (not filled) or disk (filled) perpendicular to the given axis.

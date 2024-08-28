@@ -10,8 +10,8 @@
 *.testsettings
 SharpSteer2/bin
 SharpSteer2/obj
-Demo/bin
-Demo/obj
+**/bin/
+**/obj/
 SharpSteer2.WinDemoContent/bin
 SharpSteer2.WinDemoContent/obj
 SharpSteer2.Tests/bin
