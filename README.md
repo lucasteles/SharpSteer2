@@ -21,6 +21,24 @@ SharpSteer is [available](https://www.nuget.org/packages/SharpSteer/) as a nuget
 $ dotnet add package SharpSteer
 ```
 
+### Demo
+
+To run the demo:
+
+```ps
+$ dotnet run --project SharpSteer2.Demo
+```
+
+#### Controls
+
+ - `Tab`: Next simulation
+ - `Space`: Pause current simulation
+ - `R`: Reset state
+ - `S`: Select the "next" vehicle
+ - `A`: Toggle debug steering behaviours annotations
+ - `C`: Select next camera mode
+ - `F`: Cycle through frame rate presets
+
 ### Documentation
 
 The original steering behaviours are documented [here](http://www.red3d.com/cwr/papers/1999/gdc99steer.html)
