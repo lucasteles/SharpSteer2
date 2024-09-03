@@ -44,7 +44,7 @@ public class Drawing
         switch (curMode)
         {
             case PrimitiveType.LineList:
-	
+
                 primitiveCount = vertices.Count / 2;
                 break;
             case PrimitiveType.LineStrip:
@@ -335,7 +335,7 @@ public class Drawing
     // a simple 3d vehicle
     public static void DrawBasic3dSphericalVehicle(IVehicle vehicle, Color color)
     {
-        var vColor = color.ToVector3();
+        var vColor = color.ToVector3().ToNumerics();
 
         // "aspect ratio" of body (as seen from above)
         const float x = 0.5f;
@@ -379,7 +379,7 @@ public class Drawing
     // a simple sphere
     public static void DrawBasic3dSphere(Vector3 position, float radius, Color color)
     {
-        var vColor = color.ToVector3();
+        var vColor = color.ToVector3().ToNumerics();
 
         // "aspect ratio" of body (as seen from above)
         const float x = 0.5f;
@@ -441,7 +441,7 @@ public class Drawing
                 ls.SetUnitSideFromForwardAndUp();
             }
 
-            // make disks visible (not culled) from both sides 
+            // make disks visible (not culled) from both sides
             if (filled) BeginDoubleSidedDrawing();
 
             // point to be rotated about the (local) Y axis, angular step size

@@ -78,7 +78,7 @@ class LowSpeedTurnPlugIn : PlugIn
             agent.Draw();
 
             // display speed near agent's screen position
-            var textColor = new Color(new Vector3(0.8f, 0.8f, 1.0f).ToXna());
+            var textColor = new Color(new Vector3(0.8f, 0.8f, 1.0f));
             var textOffset = new Vector3(0, 0.25f, 0);
             var textPosition = agent.Position + textOffset;
             var annote = $"{agent.Speed:0.00}";

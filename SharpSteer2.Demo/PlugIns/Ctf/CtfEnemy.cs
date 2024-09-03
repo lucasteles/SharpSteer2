@@ -51,6 +51,7 @@ public class CtfEnemy : CtfBase
         {
             ApplyBrakingForce(Globals.BrakingRate, elapsedTime);
         }
+
         ApplySteeringForce(steer, elapsedTime);
 
         // annotation
@@ -68,7 +69,8 @@ public class CtfEnemy : CtfBase
             if (Globals.Seeker.State == SeekerState.Tagged)
             {
                 var color = new Color((byte)(255.0f * 0.8f), (byte)(255.0f * 0.5f), (byte)(255.0f * 0.5f));
-                Annotation.DiskXZ(sumOfRadii, (Position + Globals.Seeker.Position) / 2, color.ToVector3().FromXna(), 20);
+                Annotation.DiskXZ(sumOfRadii, (Position + Globals.Seeker.Position) / 2, color.ToVector3().ToNumerics(),
+                    20);
             }
         }
     }

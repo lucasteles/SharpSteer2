@@ -31,10 +31,10 @@ public class Pedestrian : SimpleVehicle
         var darkOrange = new Color((byte)(255.0f * 0.6f), (byte)(255.0f * 0.3f), 0);
 
         // draw line from our position to our predicted future position
-        Annotation.Line(Position, future, yellow.ToVector3().FromXna());
+        Annotation.Line(Position, future, yellow.ToVector3().ToNumerics());
 
         // draw line from our position to our steering target on the path
-        Annotation.Line(Position, target, Color.Orange.ToVector3().FromXna());
+        Annotation.Line(Position, target, Color.Orange.ToVector3().ToNumerics());
 
         // draw a two-toned line between the future test point and its
         // projection onto the path, the change from dark to light color
@@ -42,8 +42,8 @@ public class Pedestrian : SimpleVehicle
         var boundaryOffset = Vector3.Normalize(onPath - future);
         boundaryOffset *= outside;
         var onPathBoundary = future + boundaryOffset;
-        Annotation.Line(onPath, onPathBoundary, darkOrange.ToVector3().FromXna());
-        Annotation.Line(onPathBoundary, future, lightOrange.ToVector3().FromXna());
+        Annotation.Line(onPath, onPathBoundary, darkOrange.ToVector3().ToNumerics());
+        Annotation.Line(onPathBoundary, future, lightOrange.ToVector3().ToNumerics());
     }
 
     // called when steerToAvoidCloseNeighbors decides steering is required
@@ -64,11 +64,11 @@ public class Pedestrian : SimpleVehicle
     {
         var green = new Color((byte)(255.0f * 0.15f), (byte)(255.0f * 0.6f), 0);
 
-        Annotation.Line(Position, ourFuture, green.ToVector3().FromXna());
-        Annotation.Line(threat.Position, threatFuture, green.ToVector3().FromXna());
-        Annotation.Line(ourFuture, threatFuture, Color.Red.ToVector3().FromXna());
-        Annotation.CircleXZ(Radius, ourFuture, green.ToVector3().FromXna(), 12);
-        Annotation.CircleXZ(Radius, threatFuture, green.ToVector3().FromXna(), 12);
+        Annotation.Line(Position, ourFuture, green.ToVector3().ToNumerics());
+        Annotation.Line(threat.Position, threatFuture, green.ToVector3().ToNumerics());
+        Annotation.Line(ourFuture, threatFuture, Color.Red.ToVector3().ToNumerics());
+        Annotation.CircleXZ(Radius, ourFuture, green.ToVector3().ToNumerics(), 12);
+        Annotation.CircleXZ(Radius, threatFuture, green.ToVector3().ToNumerics(), 12);
     }
 
     // xxx perhaps this should be a call to a general purpose annotation for
@@ -82,10 +82,10 @@ public class Pedestrian : SimpleVehicle
         var fl = Position + boxFront + boxSide;
         var br = Position - boxSide;
         var bl = Position + boxSide;
-        Annotation.Line(fr, fl, Color.White.ToVector3().FromXna());
-        Annotation.Line(fl, bl, Color.White.ToVector3().FromXna());
-        Annotation.Line(bl, br, Color.White.ToVector3().FromXna());
-        Annotation.Line(br, fr, Color.White.ToVector3().FromXna());
+        Annotation.Line(fr, fl, Color.White.ToVector3().ToNumerics());
+        Annotation.Line(fl, bl, Color.White.ToVector3().ToNumerics());
+        Annotation.Line(bl, br, Color.White.ToVector3().ToNumerics());
+        Annotation.Line(br, fr, Color.White.ToVector3().ToNumerics());
     }
 
     // constructor
@@ -147,12 +147,12 @@ public class Pedestrian : SimpleVehicle
             if (Vector3.Distance(Position, Globals.Endpoint0) < path.Radius)
             {
                 pathDirection = true;
-                Annotation.CircleXZ(path.Radius, Globals.Endpoint0, Color.DarkRed.ToVector3().FromXna(), 20);
+                Annotation.CircleXZ(path.Radius, Globals.Endpoint0, Color.DarkRed.ToVector3().ToNumerics(), 20);
             }
             if (Vector3.Distance(Position, Globals.Endpoint1) < path.Radius)
             {
                 pathDirection = false;
-                Annotation.CircleXZ(path.Radius, Globals.Endpoint1, Color.DarkRed.ToVector3().FromXna(), 20);
+                Annotation.CircleXZ(path.Radius, Globals.Endpoint1, Color.DarkRed.ToVector3().ToNumerics(), 20);
             }
         }
 

@@ -9,21 +9,19 @@ namespace SharpSteer2.Demo;
 /// </summary>
 public class Trail
 {
-    int currentIndex;			// Array index of most recently recorded point
-    readonly float sampleInterval;		// Desired interval between taking samples
-    float lastSampleTime;		// Global time when lat sample was taken
-    int dottedPhase;			// Dotted line: draw segment or not
-    Vector3 currentPosition;	// Last reported position of vehicle
-    readonly Vector3[] vertices;			// Array (ring) of recent points along trail
-    readonly byte[] flags;				// Array (ring) of flag bits for trail points
+    int currentIndex; // Array index of most recently recorded point
+    readonly float sampleInterval; // Desired interval between taking samples
+    float lastSampleTime; // Global time when lat sample was taken
+    int dottedPhase; // Dotted line: draw segment or not
+    Vector3 currentPosition; // Last reported position of vehicle
+    readonly Vector3[] vertices; // Array (ring) of recent points along trail
+    readonly byte[] flags; // Array (ring) of flag bits for trail points
 
     /// <summary>
     /// Initializes a new instance of Trail.
     /// </summary>
     public Trail()
-        : this(5, 100)
-    {
-    }
+        : this(5, 100) { }
 
     /// <summary>
     /// Initializes a new instance of Trail.
@@ -73,6 +71,7 @@ public class Trail
             flags[currentIndex] = (byte)(dottedPhase | (tick ? 2 : 0));
             lastSampleTime = currentTime;
         }
+
         currentPosition = position;
     }
 
@@ -97,7 +96,7 @@ public class Trail
                 if (j == 0)
                 {
                     // draw segment from current position to first trail point
-                    annotation.Line(currentPosition, vertices[index], color.ToVector3().FromXna());
+                    annotation.Line(currentPosition, vertices[index], color.ToVector3().ToNumerics());
                 }
                 else
                 {
@@ -105,9 +104,10 @@ public class Trail
                     const float minO = 0.05f; // minimum opacity
                     var fraction = (float)j / vertices.Length;
                     var opacity = (fraction * (1 - minO)) + minO;
-                    annotation.Line(vertices[index], vertices[next], color.ToVector3().FromXna(), opacity);
+                    annotation.Line(vertices[index], vertices[next], color.ToVector3().ToNumerics(), opacity);
                 }
             }
+
             index = next;
         }
     }

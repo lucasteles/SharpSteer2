@@ -30,7 +30,7 @@ public class CtfBase : SimpleVehicle
 
     // constructor
     protected CtfBase(CtfPlugIn plugin, IAnnotationService annotations = null, float baseRadius = 1.5f)
-        :base(annotations)
+        : base(annotations)
     {
         this.plugin = plugin;
         this.baseRadius = baseRadius;
@@ -41,16 +41,16 @@ public class CtfBase : SimpleVehicle
     // reset state
     public override void Reset()
     {
-        base.Reset();  // reset the vehicle
+        base.Reset(); // reset the vehicle
 
-        Speed = 3;             // speed along Forward direction.
+        Speed = 3; // speed along Forward direction.
 
-        avoiding = false;         // not actively avoiding
+        avoiding = false; // not actively avoiding
 
-        RandomizeStartingPositionAndHeading();  // new starting position
+        RandomizeStartingPositionAndHeading(); // new starting position
 
         trail = new();
-        trail.Clear();     // prevent long streaks due to teleportation
+        trail.Clear(); // prevent long streaks due to teleportation
     }
 
     // draw this character/vehicle into the scene
@@ -72,10 +72,10 @@ public class CtfBase : SimpleVehicle
         var fl = Position + boxFront + boxSide;
         var br = Position - boxSide;
         var bl = Position + boxSide;
-        Annotation.Line(fr, fl, Color.White.ToVector3().FromXna());
-        Annotation.Line(fl, bl, Color.White.ToVector3().FromXna());
-        Annotation.Line(bl, br, Color.White.ToVector3().FromXna());
-        Annotation.Line(br, fr, Color.White.ToVector3().FromXna());
+        Annotation.Line(fr, fl, Color.White.ToVector3().ToNumerics());
+        Annotation.Line(fl, bl, Color.White.ToVector3().ToNumerics());
+        Annotation.Line(bl, br, Color.White.ToVector3().ToNumerics());
+        Annotation.Line(br, fr, Color.White.ToVector3().ToNumerics());
     }
 
     public void DrawHomeBase()
@@ -148,11 +148,12 @@ public class CtfBase : SimpleVehicle
         {
             r = RandomHelpers.Random(1.5f, 4);
             c = Vector3Helpers.RandomVectorOnUnitRadiusXZDisk() * Globals.MaxStartRadius * 1.1f;
-            minClearance = AllObstacles.Aggregate(float.MaxValue, (current, t) => TestOneObstacleOverlap(current, r, t.Radius, c, t.Center));
+            minClearance = AllObstacles.Aggregate(float.MaxValue,
+                (current, t) => TestOneObstacleOverlap(current, r, t.Radius, c, t.Center));
 
-            minClearance = TestOneObstacleOverlap(minClearance, r, radius - requiredClearance, c, Globals.HomeBaseCenter);
-        }
-        while (minClearance < requiredClearance);
+            minClearance =
+                TestOneObstacleOverlap(minClearance, r, radius - requiredClearance, c, Globals.HomeBaseCenter);
+        } while (minClearance < requiredClearance);
 
         // add new non-overlapping obstacle to registry
         AllObstacles.Add(new(r, c));
@@ -172,7 +173,8 @@ public class CtfBase : SimpleVehicle
     {
         const float r = 0;
         var c = point;
-        return AllObstacles.Aggregate(float.MaxValue, (current, t) => TestOneObstacleOverlap(current, r, t.Radius, c, t.Center));
+        return AllObstacles.Aggregate(float.MaxValue,
+            (current, t) => TestOneObstacleOverlap(current, r, t.Radius, c, t.Center));
     }
 
     static float TestOneObstacleOverlap(float minClearance, float r, float radius, Vector3 c, Vector3 center)

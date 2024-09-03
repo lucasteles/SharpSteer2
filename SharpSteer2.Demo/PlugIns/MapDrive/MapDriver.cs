@@ -183,7 +183,7 @@ public class MapDriver : SimpleVehicle
                     var flat = wander;
                     var weighted = flat.TruncateLength(MaxForce) * 6;
                     var a = Position + new Vector3(0, 0.2f, 0);
-                    Annotation.Line(a, a + (weighted * 0.3f), Color.White.ToVector3().FromXna());
+                    Annotation.Line(a, a + (weighted * 0.3f), Color.White.ToVector3().ToNumerics());
                     steering += weighted;
                 }
 
@@ -207,8 +207,8 @@ public class MapDriver : SimpleVehicle
                         {
                             var b = Position + (Up * 0.2f) + (Forward * halfLength * 1.4f);
                             const float l = 2;
-                            Annotation.Line(b, b + (Forward * l), Color.Cyan.ToVector3().FromXna());
-                            Annotation.Line(b, b + (pathHeading * l), Color.Cyan.ToVector3().FromXna());
+                            Annotation.Line(b, b + (Forward * l), Color.Cyan.ToVector3().ToNumerics());
+                            Annotation.Line(b, b + (pathHeading * l), Color.Cyan.ToVector3().ToNumerics());
                         }
                         steering += SteerTowardHeading(pathHeading) *
                                     (Path.NearWaypoint(Position) ? 0.5f : 0.1f);
@@ -237,7 +237,7 @@ public class MapDriver : SimpleVehicle
             var circles = WeAreGoingInCircles();
             if (circles && !Stuck) StuckCycleCount++;
             if (circles) Stuck = true;
-            Annotation.CircleOrDisk(0.5f, Up, SmoothedPosition, Color.White.ToVector3().FromXna(), 12, circles, false);
+            Annotation.CircleOrDisk(0.5f, Up, SmoothedPosition, Color.White.ToVector3().ToNumerics(), 12, circles, false);
         }
 
         // annotation
@@ -288,9 +288,9 @@ public class MapDriver : SimpleVehicle
             // if not, the "hint" is to turn to align with path heading
             var s = Side * halfWidth;
             var f = halfLength * 2;
-            Annotation.Line(p + s, p + s + (Forward * f), Color.Black.ToVector3().FromXna());
-            Annotation.Line(p - s, p - s + (Forward * f), Color.Black.ToVector3().FromXna());
-            Annotation.Line(p, p + (pathHeading * 5), Color.Magenta.ToVector3().FromXna());
+            Annotation.Line(p + s, p + s + (Forward * f), Color.Black.ToVector3().ToNumerics());
+            Annotation.Line(p - s, p - s + (Forward * f), Color.Black.ToVector3().ToNumerics());
+            Annotation.Line(p, p + (pathHeading * 5), Color.Magenta.ToVector3().ToNumerics());
             return pathHeading;
         }
         else
@@ -325,14 +325,14 @@ public class MapDriver : SimpleVehicle
                         {
                             var temp = Vector3.Normalize(offset);
                             var q = p + (temp * 5);
-                            Annotation.Line(p, q, Color.Magenta.ToVector3().FromXna());
-                            Annotation.CircleOrDisk(0.4f, Up, o, Color.White.ToVector3().FromXna(), 12, false, false);
+                            Annotation.Line(p, q, Color.Magenta.ToVector3().ToNumerics());
+                            Annotation.CircleOrDisk(0.4f, Up, o, Color.White.ToVector3().ToNumerics(), 12, false, false);
                             return offset;
                         }
                     }
                 }
 
-                Annotation.CircleOrDisk(0.4f, Up, o, Color.Black.ToVector3().FromXna(), 12, false, false);
+                Annotation.CircleOrDisk(0.4f, Up, o, Color.Black.ToVector3().ToNumerics(), 12, false, false);
             }
         }
 
@@ -367,7 +367,7 @@ public class MapDriver : SimpleVehicle
         if (hintGiven && !dtZero)
             HintGivenCount++;
         if (hintGiven)
-            Annotation.CircleOrDisk(halfWidth * 0.9f, Up, Position + (Up * 0.2f), Color.White.ToVector3().FromXna(), 12,
+            Annotation.CircleOrDisk(halfWidth * 0.9f, Up, Position + (Up * 0.2f), Color.White.ToVector3().ToNumerics(), 12,
                 false, false);
 
         // QQQ temporary global QQQoaJustScraping
@@ -394,8 +394,8 @@ public class MapDriver : SimpleVehicle
                 const float q = twoPi * fracLimit;
                 var fooz = Position - center;
                 var booz = fooz.RotateAboutGlobalY(sign * q);
-                Annotation.Line(center, center + fooz, Color.Red.ToVector3().FromXna());
-                Annotation.Line(center, center + booz, Color.Red.ToVector3().FromXna());
+                Annotation.Line(center, center + fooz, Color.Red.ToVector3().ToNumerics());
+                Annotation.Line(center, center + booz, Color.Red.ToVector3().ToNumerics());
             }
         }
 
@@ -586,7 +586,7 @@ public class MapDriver : SimpleVehicle
         {
             var blue = new Color(0, 0, (byte)(255.0f * 0.8f));
             Annotation.CircleOrDisk(MinimumTurningRadius() * 1.2f, Up,
-                center, blue.ToVector3().FromXna(), 40, false, false);
+                center, blue.ToVector3().ToNumerics(), 40, false, false);
             return Side * sign;
         }
 
@@ -643,7 +643,7 @@ public class MapDriver : SimpleVehicle
         {
             var hit = scanOrigin + (scanStep * scanIndex);
             Annotation.Line(scanOrigin, hit,
-                new Color((byte)(255.0f * 0.7f), (byte)(255.0f * 0.3f), (byte)(255.0f * 0.3f)).ToVector3().FromXna());
+                new Color((byte)(255.0f * 0.7f), (byte)(255.0f * 0.3f), (byte)(255.0f * 0.3f)).ToVector3().ToNumerics());
         }
     }
 
@@ -655,10 +655,10 @@ public class MapDriver : SimpleVehicle
         var ff = Forward * r;
         var ss = Side * r;
         var pp = Position + (Up * 0.2f);
-        Annotation.Line(pp + ff + ss, pp - ff + ss, Color.White.ToVector3().FromXna());
-        Annotation.Line(pp - ff - ss, pp - ff + ss, Color.White.ToVector3().FromXna());
-        Annotation.Line(pp - ff - ss, pp + ff - ss, Color.White.ToVector3().FromXna());
-        Annotation.Line(pp + ff + ss, pp + ff - ss, Color.White.ToVector3().FromXna());
+        Annotation.Line(pp + ff + ss, pp - ff + ss, Color.White.ToVector3().ToNumerics());
+        Annotation.Line(pp - ff - ss, pp - ff + ss, Color.White.ToVector3().ToNumerics());
+        Annotation.Line(pp - ff - ss, pp + ff - ss, Color.White.ToVector3().ToNumerics());
+        Annotation.Line(pp + ff + ss, pp + ff - ss, Color.White.ToVector3().ToNumerics());
 
         //OpenSteerDemo.clock.setPausedState (true);
     }
@@ -719,7 +719,7 @@ public class MapDriver : SimpleVehicle
             // to loop only for the sake of annotation (make that optional?)
             if (obstacleFound)
             {
-                Annotation.Line(oldPoint, newPoint, afterColor.ToVector3().FromXna());
+                Annotation.Line(oldPoint, newPoint, afterColor.ToVector3().ToNumerics());
             }
             else
             {
@@ -736,7 +736,7 @@ public class MapDriver : SimpleVehicle
                     returnObstaclePosition = newPoint;
                 }
 
-                Annotation.Line(oldPoint, newPoint, beforeColor.ToVector3().FromXna());
+                Annotation.Line(oldPoint, newPoint, beforeColor.ToVector3().ToNumerics());
             }
 
             // save new point for next time around loop
@@ -814,8 +814,8 @@ public class MapDriver : SimpleVehicle
             if (!CurvedSteering)
             {
                 var d = step * samples;
-                Annotation.Line(lOffset, lOffset + d, Color.White.ToVector3().FromXna());
-                Annotation.Line(rOffset, rOffset + d, Color.White.ToVector3().FromXna());
+                Annotation.Line(lOffset, lOffset + d, Color.White.ToVector3().ToNumerics());
+                Annotation.Line(rOffset, rOffset + d, Color.White.ToVector3().ToNumerics());
             }
 
             // increment sideways displacement of scan line
@@ -1006,7 +1006,7 @@ public class MapDriver : SimpleVehicle
         // facing the wrong way?
         if (alignedness < 0)
         {
-            Annotation.Line(p, p + (nowTangent * 10), Color.Cyan.ToVector3().FromXna());
+            Annotation.Line(p, p + (nowTangent * 10), Color.Cyan.ToVector3().ToNumerics());
 
             // if nearly anti-parallel
             if (alignedness < -0.707f)
@@ -1030,7 +1030,7 @@ public class MapDriver : SimpleVehicle
         else
         {
             // otherwise determine corrective steering (including braking)
-            Annotation.Line(futurePosition, futurePosition + pathHeading, Color.Red.ToVector3().FromXna());
+            Annotation.Line(futurePosition, futurePosition + pathHeading, Color.Red.ToVector3().ToNumerics());
             AnnotatePathFollowing(futurePosition, onPath,
                 Position, futureOutside);
 
@@ -1038,7 +1038,7 @@ public class MapDriver : SimpleVehicle
             if (Path.NearWaypoint(onPath) && futureOutside > 0)
             {
                 // steer to align with next path segment
-                Annotation.Circle3D(0.5f, futurePosition, Up, Color.Red.ToVector3().FromXna(), 8);
+                Annotation.Circle3D(0.5f, futurePosition, Up, Color.Red.ToVector3().ToNumerics(), 8);
                 return SteerTowardHeading(pathHeading) + braking;
             }
             else
@@ -1058,7 +1058,7 @@ public class MapDriver : SimpleVehicle
         var p = Position;
 
         // draw the circular collision boundary
-        Annotation.CircleOrDisk(Radius, Up, p, Color.Black.ToVector3().FromXna(), 32, false, false);
+        Annotation.CircleOrDisk(Radius, Up, p, Color.Black.ToVector3().ToNumerics(), 32, false, false);
 
         // draw forward sensing corridor and wings ( for non-curved case)
         if (!CurvedSteering)
@@ -1074,19 +1074,19 @@ public class MapDriver : SimpleVehicle
                 var c3 = p - corSide + corFront;
                 var c4 = p - corSide + corBack;
                 var color = annotateAvoid != Vector3.Zero ? Color.Red : Color.Yellow;
-                Annotation.Line(c1, c2, color.ToVector3().FromXna());
-                Annotation.Line(c2, c3, color.ToVector3().FromXna());
-                Annotation.Line(c3, c4, color.ToVector3().FromXna());
+                Annotation.Line(c1, c2, color.ToVector3().ToNumerics());
+                Annotation.Line(c2, c3, color.ToVector3().ToNumerics());
+                Annotation.Line(c3, c4, color.ToVector3().ToNumerics());
 
                 // draw sensing "wings"
                 var wingWidth = Side * WingSlope() * corLength;
                 var wingTipL = c2 + wingWidth;
                 var wingTipR = c3 - wingWidth;
                 var wingColor = Color.Orange;
-                if (wingDrawFlagL) Annotation.Line(c2, wingTipL, wingColor.ToVector3().FromXna());
-                if (wingDrawFlagL) Annotation.Line(c1, wingTipL, wingColor.ToVector3().FromXna());
-                if (wingDrawFlagR) Annotation.Line(c3, wingTipR, wingColor.ToVector3().FromXna());
-                if (wingDrawFlagR) Annotation.Line(c4, wingTipR, wingColor.ToVector3().FromXna());
+                if (wingDrawFlagL) Annotation.Line(c2, wingTipL, wingColor.ToVector3().ToNumerics());
+                if (wingDrawFlagL) Annotation.Line(c1, wingTipL, wingColor.ToVector3().ToNumerics());
+                if (wingDrawFlagR) Annotation.Line(c3, wingTipR, wingColor.ToVector3().ToNumerics());
+                if (wingDrawFlagR) Annotation.Line(c4, wingTipR, wingColor.ToVector3().ToNumerics());
             }
         }
 
@@ -1094,7 +1094,7 @@ public class MapDriver : SimpleVehicle
         var above = Position + new Vector3(0, 0.2f, 0);
         var accel = Acceleration * 5 / MaxForce;
         var aColor = new Color((byte)(255.0f * 0.4f), (byte)(255.0f * 0.4f), (byte)(255.0f * 0.8f));
-        Annotation.Line(above, above + accel, aColor.ToVector3().FromXna());
+        Annotation.Line(above, above + accel, aColor.ToVector3().ToNumerics());
     }
 
     // draw vehicle's body and annotation
@@ -1134,10 +1134,10 @@ public class MapDriver : SimpleVehicle
 
         // draw line from our position to our predicted future position
         if (!CurvedSteering)
-            Annotation.Line(Position, future, futurePositionColor.ToVector3().FromXna());
+            Annotation.Line(Position, future, futurePositionColor.ToVector3().ToNumerics());
 
         // draw line from our position to our steering target on the path
-        Annotation.Line(Position, target, toTargetColor.ToVector3().FromXna());
+        Annotation.Line(Position, target, toTargetColor.ToVector3().ToNumerics());
 
         // draw a two-toned line between the future test point and its
         // projection onto the path, the change from dark to light color
@@ -1148,8 +1148,8 @@ public class MapDriver : SimpleVehicle
         boundaryOffset *= o;
 
         var onPathBoundary = future + boundaryOffset;
-        Annotation.Line(onPath, onPathBoundary, insidePathColor.ToVector3().FromXna());
-        Annotation.Line(onPathBoundary, future, outsidePathColor.ToVector3().FromXna());
+        Annotation.Line(onPath, onPathBoundary, insidePathColor.ToVector3().ToNumerics());
+        Annotation.Line(onPathBoundary, future, outsidePathColor.ToVector3().ToNumerics());
     }
 
     public void DrawMap()
@@ -1207,7 +1207,7 @@ public class MapDriver : SimpleVehicle
         var pathColor = new Vector3(0, 0.5f, 0.5f);
         var sandColor = new Vector3(0.8f, 0.7f, 0.5f);
         var vColor = Vector3.Lerp(sandColor, pathColor, 0.1f);
-        var color = new Color(vColor.ToXna());
+        var color = new Color(vColor);
 
         var down = new Vector3(0, -0.1f, 0);
         for (var i = 0; i < Path.PointCount; i++)
@@ -1220,7 +1220,7 @@ public class MapDriver : SimpleVehicle
                 var legWidth = Path.Radii[i];
 
                 Drawing.DrawXzWideLine(endPoint0, endPoint1, color, legWidth * 2);
-                Drawing.DrawLine(Path.Points[i], Path.Points[i - 1], new(pathColor.ToXna()));
+                Drawing.DrawLine(Path.Points[i], Path.Points[i - 1], new(pathColor));
                 Drawing.DrawXzDisk(legWidth, endPoint0, color, 24);
                 Drawing.DrawXzDisk(legWidth, endPoint1, color, 24);
             }
@@ -1376,9 +1376,9 @@ public class MapDriver : SimpleVehicle
             // annotation
             var u = new Vector3(0, 0.5f, 0);
             var p = Position;
-            Annotation.Line(p + u, p + u + absolute, Color.Red.ToVector3().FromXna());
-            Annotation.Line(p + u, p + u + curved, Color.Yellow.ToVector3().FromXna());
-            Annotation.Line(p + u * 2, p + u * 2 + currentSteering, Color.Green.ToVector3().FromXna());
+            Annotation.Line(p + u, p + u + absolute, Color.Red.ToVector3().ToNumerics());
+            Annotation.Line(p + u, p + u + curved, Color.Yellow.ToVector3().ToNumerics());
+            Annotation.Line(p + u * 2, p + u * 2 + currentSteering, Color.Green.ToVector3().ToNumerics());
         }
         return currentSteering;
     }
@@ -1452,7 +1452,7 @@ public class MapDriver : SimpleVehicle
                 var localCenterOfCurvature = Side * signedRadius;
                 var center = Position + localCenterOfCurvature;
                 Annotation.CircleOrDisk(MinimumTurningRadius(), Up,
-                    center, Color.Blue.ToVector3().FromXna(), 40, false, false);
+                    center, Color.Blue.ToVector3().ToNumerics(), 40, false, false);
             }
             return trimmed + widenOut;
         }
@@ -1554,7 +1554,7 @@ public class MapDriver : SimpleVehicle
             // rotate point to next step around circle
             spoke = spoke.RotateAboutGlobalY(step, ref sin, ref cos);
 
-            Annotation.Line(spoke + center, old, color.ToVector3().FromXna());
+            Annotation.Line(spoke + center, old, color.ToVector3().ToNumerics());
         }
     }
 

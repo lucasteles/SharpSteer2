@@ -13,6 +13,8 @@ using Microsoft.Xna.Framework;
 using SharpSteer2.Helpers;
 using Vector3 = System.Numerics.Vector3;
 
+// ReSharper disable PossiblyImpureMethodCallOnReadonlyVariable
+
 namespace SharpSteer2.Demo.PlugIns.Ctf;
 
 public class CtfSeeker : CtfBase
@@ -88,7 +90,8 @@ public class CtfSeeker : CtfBase
             var eForwardDistance = Vector3.Dot(Forward, eOffset);
 
             // xxx temp move this up before the conditionals
-            Annotation.CircleXZ(e.Radius, eFuture, Globals.ClearPathColor.ToVector3().FromXna(), 20); //xxx
+            // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable
+            Annotation.CircleXZ(e.Radius, eFuture, Globals.ClearPathColor.ToVector3().ToNumerics(), 20); //xxx
 
             // consider as potential blocker if within the corridor
             if (inCorridor)
@@ -116,7 +119,8 @@ public class CtfSeeker : CtfBase
                     if (!safeToTurnTowardsGoal)
                     {
                         // this enemy blocks the path to the goal, so return false
-                        Annotation.Line(Position, e.Position, Globals.ClearPathColor.ToVector3().FromXna());
+                        Annotation.Line(Position, e.Position,
+                            Globals.ClearPathColor.ToVector3().ToNumerics());
                         // return false;
                         xxxReturn = false;
                     }
@@ -158,18 +162,18 @@ public class CtfSeeker : CtfBase
         {
             // we have a clear path (defender-free corridor), use pure seek
 
-            Annotation.Line(Position, Position + (seek * 0.2f), Globals.SeekColor.ToVector3().FromXna());
+            Annotation.Line(Position, Position + (seek * 0.2f), Globals.SeekColor.ToVector3().ToNumerics());
             return seek;
         }
 
         var evade = XxxSteerToEvadeAllDefenders();
         var steer = (seek + evade).LimitMaxDeviationAngle(0.707f, Forward);
 
-        Annotation.Line(Position, Position + seek, Color.Red.ToVector3().FromXna());
-        Annotation.Line(Position, Position + evade, Color.Green.ToVector3().FromXna());
+        Annotation.Line(Position, Position + seek, Color.Red.ToVector3().ToNumerics());
+        Annotation.Line(Position, Position + evade, Color.Green.ToVector3().ToNumerics());
 
         // annotation: show evasion steering force
-        Annotation.Line(Position, Position + (steer * 0.2f), Globals.EvadeColor.ToVector3().FromXna());
+        Annotation.Line(Position, Position + (steer * 0.2f), Globals.EvadeColor.ToVector3().ToNumerics());
         return steer;
     }
 
@@ -262,7 +266,8 @@ public class CtfSeeker : CtfBase
                     var timeEstimate = 0.15f * eDistance / e.Speed; //xxx
                     var future = e.PredictFuturePosition(timeEstimate);
 
-                    Annotation.CircleXZ(e.Radius, future, Globals.EvadeColor.ToVector3().FromXna(), 20); // xxx
+                    Annotation.CircleXZ(e.Radius, future, Globals.EvadeColor.ToVector3().ToNumerics(),
+                        20); // xxx
 
                     var offset = future - Position;
                     var lateral = Vector3Helpers.PerpendicularComponent(offset, Forward);
@@ -290,7 +295,7 @@ public class CtfSeeker : CtfBase
             var eFuture = e.PredictFuturePosition(timeEstimate);
 
             // annotation
-            Annotation.CircleXZ(e.Radius, eFuture, Globals.EvadeColor.ToVector3().FromXna(), 20);
+            Annotation.CircleXZ(e.Radius, eFuture, Globals.EvadeColor.ToVector3().ToNumerics(), 20);
 
             // steering to flee from eFuture (enemy's future position)
             var flee = SteerForFlee(eFuture);
@@ -334,10 +339,10 @@ public class CtfSeeker : CtfBase
         var gun = this.LocalRotateForwardToSide(goalDirection);
         var gn = gun * sideThreshold;
         var hbc = Globals.HomeBaseCenter;
-        Annotation.Line(pbb + gn, hbc + gn, Globals.ClearPathColor.ToVector3().FromXna());
-        Annotation.Line(pbb - gn, hbc - gn, Globals.ClearPathColor.ToVector3().FromXna());
-        Annotation.Line(hbc - gn, hbc + gn, Globals.ClearPathColor.ToVector3().FromXna());
-        Annotation.Line(pbb - gn, pbb + gn, Globals.ClearPathColor.ToVector3().FromXna());
+        Annotation.Line(pbb + gn, hbc + gn, Globals.ClearPathColor.ToVector3().ToNumerics());
+        Annotation.Line(pbb - gn, hbc - gn, Globals.ClearPathColor.ToVector3().ToNumerics());
+        Annotation.Line(hbc - gn, hbc + gn, Globals.ClearPathColor.ToVector3().ToNumerics());
+        Annotation.Line(pbb - gn, pbb + gn, Globals.ClearPathColor.ToVector3().ToNumerics());
         //annotation.AnnotationLine(pbb - behindSide, pbb + behindSide, Globals.clearPathColor);
     }
 

@@ -173,7 +173,7 @@ public class GameDemo : Game
         var gray2 = new Color(new Vector3(0.30f));
 
         // draw 50x50 checkerboard grid with 50 squares along each side
-        Drawing.DrawXzCheckerboardGrid(50, 50, gridCenter.FromXna(), gray1, gray2);
+        Drawing.DrawXzCheckerboardGrid(50, 50, gridCenter.ToNumerics(), gray1, gray2);
 
         // alternate style
         //Bnoerj.AI.Steering.Draw.drawXZLineGrid(50, 50, gridCenter, Color.Black);
@@ -205,7 +205,7 @@ public class GameDemo : Game
         {
             var diameter = v.Radius * 2;
             var size = new Vector3(diameter, diameter, diameter);
-            Drawing.DrawBoxOutline(v, size.FromXna(), color);
+            Drawing.DrawBoxOutline(v, size.ToNumerics(), color);
         }
     }
 
@@ -256,7 +256,7 @@ public class GameDemo : Game
         foreach (var vehicle in vehicles)
         {
             // distance from this vehicle's center to the selection line:
-            var d = vehicle.Position.DistanceFromLine(Camera.Position, direction.FromXna());
+            var d = vehicle.Position.DistanceFromLine(Camera.Position, direction.ToNumerics());
 
             // if this vehicle-to-line distance is the smallest so far,
             // store it and this vehicle in the selection registers.
@@ -548,9 +548,9 @@ public class GameDemo : Game
 
         WorldMatrix = Matrix.Identity;
 
-        var pos = Camera.Position.ToXna();
-        var lookAt = Camera.Target.ToXna();
-        var up = Camera.Up.ToXna();
+        var pos = Camera.Position;
+        var lookAt = Camera.Target;
+        var up = Camera.Up;
         ViewMatrix = Matrix.CreateLookAt(new(pos.X, pos.Y, pos.Z), new(lookAt.X, lookAt.Y, lookAt.Z),
             new(up.X, up.Y, up.Z));
 
@@ -590,7 +590,7 @@ public class GameDemo : Game
         float lh = font.LineSpacing;
 
         foreach (var text in texts)
-            spriteBatch.DrawString(font, text.Text, text.Position.ToXna(), text.Color);
+            spriteBatch.DrawString(font, text.Text, text.Position, text.Color);
         texts.Clear();
 
         // get smoothed phase timer information

@@ -167,7 +167,7 @@ public class MapDrivePlugIn : PlugIn
         QqqRange("WL ", MapDriver.SavedNearestWl, status);
         var screenLocation = new Vector3(15, 50, 0);
         var color = new Vector3(0.15f, 0.15f, 0.5f);
-        Drawing.Draw2dTextAt2dLocation(status.ToString(), screenLocation, new(color.ToXna()));
+        Drawing.Draw2dTextAt2dLocation(status.ToString(), screenLocation, new(color));
 
         {
             var v = Drawing.GetWindowHeight() - 5;
@@ -295,7 +295,7 @@ public class MapDrivePlugIn : PlugIn
     }
 
     // random utility, worth moving to Utilities.h?
-	    
+
 
     void RegenerateMap()
     {
@@ -406,7 +406,7 @@ public class MapDrivePlugIn : PlugIn
                 if (outside > 0 && outside < wallThickness)
                     map.SetMapBit(i, j, true);
 
-                // clear all other off-path map cells 
+                // clear all other off-path map cells
                 if (outside > wallThickness) map.SetMapBit(i, j, false);
 
                 g += alongRow;

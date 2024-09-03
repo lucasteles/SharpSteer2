@@ -94,7 +94,7 @@ public class FlowFieldPlugIn : PlugIn
             {
                 var location = new Vector3(range / samples * i - range / 2, 0, range / samples * j - range / 2);
                 var flow = FlowField.Sample(location);
-                Annotations.Line(location, location + flow, Color.Black.ToVector3().FromXna());
+                Annotations.Line(location, location + flow, Color.Black.ToVector3().ToNumerics());
             }
         }
 

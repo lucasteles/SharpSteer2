@@ -23,8 +23,9 @@ public class Player : SimpleVehicle
     public override float MaxSpeed => 10;
 
     // constructor
-    public Player(List<Player> others, List<Player> allplayers, Ball ball, bool isTeamA, int id, IAnnotationService annotations = null)
-        :base(annotations)
+    public Player(List<Player> others, List<Player> allplayers, Ball ball, bool isTeamA, int id,
+        IAnnotationService annotations = null)
+        : base(annotations)
     {
         allPlayers = allplayers;
         this.ball = ball;
@@ -38,18 +39,22 @@ public class Player : SimpleVehicle
     public override void Reset()
     {
         base.Reset(); // reset the vehicle
-        Speed = 0.0f;         // speed along Forward direction.
+        Speed = 0.0f; // speed along Forward direction.
 
         // Place me on my part of the field, looking at oponnents goal
-        Position = new(imTeamA ? RandomHelpers.Random() * 20 : -RandomHelpers.Random() * 20, 0, (RandomHelpers.Random() - 0.5f) * 20);
+        Position = new(imTeamA ? RandomHelpers.Random() * 20 : -RandomHelpers.Random() * 20, 0,
+            (RandomHelpers.Random() - 0.5f) * 20);
         if (myId < 9)
         {
-            Position = imTeamA ? Globals.PlayerPosition[myId] : new(-Globals.PlayerPosition[myId].X, Globals.PlayerPosition[myId].Y, Globals.PlayerPosition[myId].Z);
+            Position = imTeamA
+                ? Globals.PlayerPosition[myId]
+                : new(-Globals.PlayerPosition[myId].X, Globals.PlayerPosition[myId].Y, Globals.PlayerPosition[myId].Z);
         }
+
         home = Position;
 
         if (trail == null) trail = new(10, 60);
-        trail.Clear();    // prevent long streaks due to teleportation
+        trail.Clear(); // prevent long streaks due to teleportation
     }
 
     // per frame simulation update
@@ -83,19 +88,18 @@ public class Player : SimpleVehicle
                         var z = ball.Position.Z - Position.Z > 0 ? -1.0f : 1.0f;
                         var behindBall = ball.Position + (imTeamA ? new(2, 0, z) : new Vector3(-2, 0, z));
                         var behindBallForce = SteerForSeek(behindBall);
-                        Annotation.Line(Position, behindBall, Color.Green.ToVector3().FromXna());
+                        Annotation.Line(Position, behindBall, Color.Green.ToVector3().ToNumerics());
                         var evadeTarget = SteerForFlee(ball.Position);
                         ApplySteeringForce(behindBallForce * 10 + evadeTarget, elapsedTime);
                     }
                 }
             }
-            else	// Go home
+            else // Go home
             {
                 var seekTarget = SteerForSeek(home);
                 var seekHome = SteerForSeek(home);
                 ApplySteeringForce(seekTarget + seekHome, elapsedTime);
             }
-
         }
     }
 
